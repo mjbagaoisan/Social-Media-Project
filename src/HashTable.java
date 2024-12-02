@@ -1,10 +1,3 @@
-/**
- * HashTable.java
- * @author Marc Jowell Bagaoisan
- * @author Partner's name
- * CIS 22C, Lab 13.2
- */
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 

@@ -1,9 +1,3 @@
-/**
- * BST.java
- * @author Marc Jowell Bagaoisan
- * @author Partner's name
- * CIS 22C Lab 9
- */
 import java.util.Comparator;
 import java.util.NoSuchElementException;
 

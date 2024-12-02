@@ -1,9 +1,3 @@
-/**
- * Graph.java
- * @author Marc Jowell Bagaoisan
- * @author Partner's name
- * CIS 22C, Lab 15
- */
 import java.util.ArrayList;
 
 public class Graph {
