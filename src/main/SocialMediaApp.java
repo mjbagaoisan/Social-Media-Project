@@ -1,6 +1,7 @@
 package main;
 
 public class SocialMediaApp {
-    //hi
-    // hows it going
+    public static void main(String[] args) {
+        System.out.println("Hello world!");
+    }
 }
