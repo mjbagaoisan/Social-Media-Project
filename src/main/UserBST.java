@@ -1,19 +1,18 @@
 package main;
 
 import dataStructures.BST;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 
 public class UserBST {
     // Two separate BSTs for different types of searches
-    private BST<User> friendNameBST;
-    private BST<User> userNameBST;
+    private final BST<User> friendNameBST;
+    private final BST<User> userNameBST;
 
     /**
      * Comparator for sorting users by full name
      */
-    private Comparator<User> nameComparator = new Comparator<User>() {
+    private final Comparator<User> nameComparator = new Comparator<User>() {
         @Override
         public int compare(User u1, User u2) {
             String fullName1 = u1.getFirstName() + " " + u1.getLastName();
@@ -25,7 +24,7 @@ public class UserBST {
     /**
      * Comparator for sorting users by username
      */
-    private Comparator<User> usernameComparator = new Comparator<User>() {
+    private final Comparator<User> usernameComparator = new Comparator<User>() {
         @Override
         public int compare(User u1, User u2) {
             return u1.getUserName().compareTo(u2.getUserName());
