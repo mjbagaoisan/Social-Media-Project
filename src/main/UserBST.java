@@ -15,8 +15,8 @@ public class UserBST {
     private final Comparator<User> nameComparator = new Comparator<User>() {
         @Override
         public int compare(User u1, User u2) {
-            String fullName1 = u1.getFirstName() + " " + u1.getLastName();
-            String fullName2 = u2.getFirstName() + " " + u2.getLastName();
+            String fullName1 = u1.getFullName();
+            String fullName2 = u2.getFullName();
             return fullName1.compareTo(fullName2);
         }
     };
@@ -27,7 +27,7 @@ public class UserBST {
     private final Comparator<User> usernameComparator = new Comparator<User>() {
         @Override
         public int compare(User u1, User u2) {
-            return u1.getUserName().compareTo(u2.getUserName());
+            return u1.getUsername().compareTo(u2.getUsername());
         }
     };
 
@@ -67,7 +67,7 @@ public class UserBST {
         for (String userStr : userNames) {
             User user = parseUser(userStr);
             if (user != null) {
-                String fullName = (user.getFirstName() + " " + user.getLastName()).toLowerCase();
+                String fullName = user.getFullName().toLowerCase();
                 if (fullName.contains(searchName)) {
                     matchingUsers.add(user);
                 }
