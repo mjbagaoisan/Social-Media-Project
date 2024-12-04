@@ -1,4 +1,4 @@
-package main;
+package dataStructures;
 
 /**
  * @author Jennifer Parrish

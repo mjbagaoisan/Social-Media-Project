@@ -1,10 +1,11 @@
-package main;
+package dataStructures;
 
 /**
  * BST.java
  * @author Minh Long Hang
  * CIS 22C Lab 9
  */
+
 import java.util.Comparator;
 import java.util.NoSuchElementException;
 

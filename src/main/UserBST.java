@@ -1,8 +1,9 @@
 package main;
 
+import dataStructures.BST;
+
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.NoSuchElementException;
 
 public class UserBST {
     // Two separate BSTs for different types of searches

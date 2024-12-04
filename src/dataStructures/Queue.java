@@ -1,4 +1,4 @@
-package main;
+package dataStructures;
 
 /**
  * The Queue class definition
