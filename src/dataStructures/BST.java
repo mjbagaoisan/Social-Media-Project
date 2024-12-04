@@ -10,6 +10,9 @@ import java.util.Comparator;
 import java.util.NoSuchElementException;
 
 public class BST<T> {
+    public void insert(int i) {
+    }
+
     private class Node {
         private T data;
         private Node left;
@@ -254,12 +257,13 @@ public class BST<T> {
     /***MUTATORS***/
 
     /**
-    * Inserts a new node in the tree.
-    * @param data the data to insert.
-    * @param cmp the Comparator indicating how data in the tree is ordered.
-    */
+     * Inserts a new node in the tree.
+     *
+     * @param data the data to insert.
+     * @param cmp  the Comparator indicating how data in the tree is ordered.
+     */
     public void insert(T data, Comparator<T> cmp) {
-        insert(data, root, cmp);
+
     }
 
     /**

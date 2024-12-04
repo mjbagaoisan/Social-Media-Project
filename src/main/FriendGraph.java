@@ -15,7 +15,7 @@ public class FriendGraph {
 
     }
 
-    public void addFriend(int user1, int user2) {
+    public static void addFriend(int user1, int user2) {
 
     }
 

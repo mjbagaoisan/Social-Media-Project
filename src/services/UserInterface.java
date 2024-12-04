@@ -46,12 +46,6 @@ public class UserInterface {
         this.friendGraph = new Graph();
     }
 
-    public void start() {
-        loadUsersFromFile("users.json");
-        mainMenu();
-        saveUsersToFile("users.json");
-        mainMenu();
-    }
 
     private void mainMenu() {
         while (true) {
@@ -137,26 +131,26 @@ public class UserInterface {
         } else {
             for (int friendId : friends) {
                 User friend = null;
-                for (User user : usernameMap.values()){
-                    if (user.getId() == friendId){
+                for (User user : usernameMap.values()) {
+                    if (user.getId() == friendId) {
                         friend = user;
                         break;
                     }
                 }
-                if (friend != null){
+                if (friend != null) {
                     System.out.println(friend.getFullName());
-                }else{
+                } else {
                     System.out.println("Unknown User");
                 }
             }
         }
-        while (true){
+        while (true) {
             System.out.println();
             System.out.println("1. Remove Friends");
             System.out.println("2. Add Friends");
             int choice = scanner.nextInt();
             scanner.nextLine();
-            switch (choice){
+            switch (choice) {
                 case 1 -> viewProfile();
                 case 2 -> removeFriend();
                 case 3 -> addFriend();
@@ -168,10 +162,10 @@ public class UserInterface {
         int userId = scanner.nextInt();
         ArrayList<Integer> profiles = getFriendProfile(userId);
         System.out.println("Here is the profile of your friend");
-        for (int profile : profiles){
+        for (int profile : profiles) {
             System.out.println((profile) + ". " + usernameMap.get(profile - 1));
         }
-        if (profiles.isEmpty()){
+        if (profiles.isEmpty()) {
             System.out.println("Sorry! There is no profile to return to you at this time.");
             System.out.println("Goodbye!");
             System.exit(0);
@@ -181,8 +175,8 @@ public class UserInterface {
     private ArrayList<Integer> getFriendProfile(int userId) {
         ArrayList<Integer> profile = new ArrayList<>();
         friendGraph.BFS(userId);
-        for (int i = 1; i <= friendGraph.getNumVertices; i++){
-            if (friendGraph.getDistance(i) > 1){
+        for (int i = 1; i <= friendGraph.getNumVertices; i++) {
+            if (friendGraph.getDistance(i) > 1) {
                 profile.add(i);
             }
         }
@@ -202,39 +196,17 @@ public class UserInterface {
         }
     }
 
-    private void removeFriend(){
+    private void removeFriend() {
         System.out.println("Enter username of friend to remove: ");
         String username = scanner.nextLine();
         User friend = usernameMap.get(username);
 
-        if (friend != null && friend == loggedInUser){
+        if (friend != null && friend == loggedInUser) {
             friendGraph.removeEdge(loggedInUser.getId(), friend.getId());
             System.out.println(friend.getFullName() + " removed as a friend.");
-        }else{
+        } else {
             System.out.println("Invalid username.");
         }
-    }
-
-    private void loadUsersFromFile(String filename) {
-        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(filename))) {
-            usernameMap = (Map<String, User>) inputStream.readObject();
-            friendGraph = (Graph) inputStream.readObject();
-        } catch (Exception e) {
-            System.out.println("No existing data found.");
-        }
-    }
-
-    private void saveUsersToFile(String filename) {
-        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(filename))) {
-            outputStream.writeObject(usernameMap);
-            outputStream.writeObject(friendGraph);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void main(String[] args) {
-        new UserInterface().start();
     }
 }
 
