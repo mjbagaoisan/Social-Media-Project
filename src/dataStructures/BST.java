@@ -263,7 +263,7 @@ public class BST<T> {
      * @param cmp  the Comparator indicating how data in the tree is ordered.
      */
     public void insert(T data, Comparator<T> cmp) {
-
+        insert(data, root, cmp);
     }
 
     /**
