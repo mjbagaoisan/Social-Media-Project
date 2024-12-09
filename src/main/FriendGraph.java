@@ -67,16 +67,14 @@ public class FriendGraph {
      * @param user2 The ID of the second user.
      */
     public static void addFriend(int user1, int user2) {
-        LinkedList<Integer> friendsUser1 = friendNetwork.getAdjacencyList(user1);
-        LinkedList<Integer> friendsUser2 = friendNetwork.getAdjacencyList(user2);
-        if (!isFriend(user1, user2)) {
-            friendsUser1.addLast(user2);
+        if (!friendNetwork.getAdjacencyList(user1).contains(user2)) {
+            friendNetwork.addUndirectedEdge(user1, user2);
+            System.out.println(names.get(user1) + " and " + names.get(user2) + " are now friends.");
+        } else {
+            System.out.println(names.get(user1) + " and " + names.get(user2) + " are already friends.");
         }
-        if (!isFriend(user2, user1)) {
-            friendsUser2.addLast(user1);
-        }
-        System.out.println(names.get(user1) + " and " + names.get(user2) + " are now friends.");
     }
+
 
     /**
      * Removes a friend from the user's friend list.

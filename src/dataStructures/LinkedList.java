@@ -515,4 +515,20 @@ public class LinkedList<T> {
         }
 
     }
+
+    /**
+     * Checks if the list contains a specific element.
+     * @param data The element to search for.
+     * @return true if the element is found, false otherwise.
+     */
+    public boolean contains(T data) {
+        Node current = first;
+        while (current != null) {
+            if (current.data.equals(data)) {
+                return true;
+            }
+            current = current.next;
+        }
+        return false;
+    }
 }
