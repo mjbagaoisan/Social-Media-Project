@@ -98,7 +98,7 @@ public class UserInterface {
             return;
         }
 
-        User newUser = new User(firstName, lastName, username, password);
+        User newUser = new User(firstName, lastName, username, password); // Update the correct constructor from User.java
         usernameMap.put(username, newUser);
         System.out.println("Account created successfully!");
     }

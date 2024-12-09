@@ -1,5 +1,5 @@
 package tests;
-
+import main.FriendGraph;
 import java.io.File;
 import java.io.PrintWriter;
 import java.nio.file.Files;
