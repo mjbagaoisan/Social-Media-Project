@@ -4,12 +4,17 @@ import dataStructures.BST;
 
 import java.io.Serializable;
 import java.util.LinkedList;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 
 public class User implements Serializable {
     private final String firstName;
     private final String lastName;
     private final String username;
     private final String passwordHash;
+    private int passwordHashID;
     private final String city;
     private BST<User> friends;
     private final LinkedList<String> interests;
@@ -25,16 +30,37 @@ public class User implements Serializable {
         this.interests = new LinkedList<String>();
         this.city = null;
         this.id = idCounter++;
+
+        //For hashing
+        try{
+            this.passwordHashID = Math.abs(passwordToInteger(password));
+        } catch (NoSuchAlgorithmException e) {
+            System.err.println("Hashing algorithm not found: " + e.getMessage());
+        }
+
+    }
+
+    //constructor option 2
+    public User(String username, String password){
+        this.username = username;
+        try{
+            this.passwordHashID = Math.abs(passwordToInteger(password));
+        } catch (NoSuchAlgorithmException e) {
+            System.err.println("Hashing algorithm not found: " + e.getMessage());
+        }
+
+        this.firstName = "";
+        this.lastName = "";
+        this.passwordHash = hashPassword(password);
+        this.friends = new BST<>();
+        this.interests = new LinkedList<String>();
+        this.city = null;
+        this.id = idCounter++;
     }
 
     private String hashPassword(String password) {
         return Integer.toHexString(password.hashCode());
     }
-
-    public boolean authenticate(String password) {
-        return passwordHash.equals(hashPassword(password));
-    }
-
 
     // Getters
     public String getFullName() {
@@ -45,13 +71,19 @@ public class User implements Serializable {
         return username;
     }
 
-  public String getPasswordHash() {
+    public String getPasswordHash() {
         return passwordHash;
     }
 
     public int getId() {
         return id;
     }
+
+    //for hashtables
+    @Override public int hashCode() {
+		return passwordHashID;
+	}
+	
 
     public String getCity() {
         return city;
@@ -79,6 +111,11 @@ public class User implements Serializable {
     }
 
 
-
+    public static int passwordToInteger(String password) throws NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] hashBytes = digest.digest(password.getBytes());
+        BigInteger hashInt = new BigInteger(1, hashBytes);
+        return hashInt.intValue(); 
+    }
 
 }
