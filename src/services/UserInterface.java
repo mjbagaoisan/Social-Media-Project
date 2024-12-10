@@ -4,6 +4,7 @@ import main.User;
 import main.FriendGraph;
 import java.io.*;
 import java.util.*;
+import dataStructures.Graph;
 
 public class UserInterface {
     private Scanner scanner;
@@ -30,13 +31,18 @@ public class UserInterface {
             scanner.nextLine(); // Consume newline
 
             switch (choice) {
-                case 1 -> login();
-                case 2 -> createAccount();
-                case 3 -> {
+                case 1: 
+                login();
+                break;
+                case 2: 
+                createAccount();
+                break;
+                case 3: {
                     System.out.println("Goodbye!");
                     return;
                 }
-                default -> System.out.println("Invalid choice.");
+                default: 
+                System.out.println("Invalid choice.");
             }
         }
     }
@@ -71,7 +77,7 @@ public class UserInterface {
             return;
         }
 
-        User newUser = new User(firstName, lastName, username, password, id, city, interests, friends);
+        User newUser = new User(firstName, lastName, username, password, 0, password, null, null);
         usernameMap.put(username, newUser);
         friendGraph.addUser(newUser.getId(), newUser.getFullName());
         System.out.println("Account created successfully!");
@@ -88,72 +94,97 @@ public class UserInterface {
             scanner.nextLine(); // Consume newline
 
             switch (choice) {
-                case 1 -> viewFriends();
-                case 2 -> addFriend();
-                case 3 -> removeFriend();
-                case 4 -> {
+                case 1: 
+                viewFriends();
+                break;
+                case 2: 
+                addFriend();
+                break;
+                case 3:
+                removeFriend();
+                break;
+                case 4: {
                     loggedInUser = null;
                     return;
                 }
-                default -> System.out.println("Invalid choice.");
+                default: System.out.println("Invalid choice.");
             }
         }
     }
 
     private void viewFriends() {
-        Set<Integer> friends = friendGraph.getFriends(loggedInUser.getId());
+        Set<Integer> friends = (Set<Integer>) friendGraph.getFriends(loggedInUser.getId());
         if (friends.isEmpty()) {
             System.out.println("No friends yet.");
         } else {
-            friends.forEach(System.out::println);
-            /**for (int friendId : friends) {
-             User friend = null;
-             for (User user : usernameMap.values()) {
-             if (user.getId() == friendId) {
-             friend = user;
-             break;
-             }
-             }
-             if (friend != null) {
-             System.out.println(friend.getFullName());
-             } else {
-             System.out.println("Unknown User");
-             }
-             }
-             }
-             while (true) {
-             System.out.println();
-             System.out.println("1. Remove Friends");
-             System.out.println("2. Add Friends");
-             int choice = scanner.nextInt();
-             scanner.nextLine();
-             switch (choice) {
-             case 1 -> viewProfile();
-             case 2 -> removeFriend();
-             case 3 -> addFriend();
-             }*/
+            for (int friendId : friends) {
+                User friend = null;
+                for (User user : usernameMap.values()) {
+                    if (user.getId() == friendId) {
+                        friend = user;
+                        break;
+                    }
+                }
+                if (friend != null) {
+                    System.out.println(friend.getFullName());
+                } else {
+                    System.out.println("Unknown User");
+                }
+            }
+        }
+        while (true) {
+            System.out.println();
+            System.out.println("1. View Profile");
+            System.out.println("2. Remove Friends");
+            System.out.println("3. Add Friends");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            switch (choice) {
+                case 1: 
+                viewProfile();
+                break;
+                case 2: 
+                removeFriend();
+                break;
+                case 3: 
+                addFriend();
+                break;
+            }
         }
     }
 
     private void viewProfile() {
+        if (!scanner.hasNextInt()) {
+            System.out.println("Invalid input. Please enter a valid user ID.");
+            scanner.next();
+            return;
+        }
         int userId = scanner.nextInt();
         ArrayList<Integer> profiles = getFriendProfile(userId);
-        System.out.println("Here is the profile of your friend");
-        for (int profile : profiles) {
-            System.out.println((profile) + ". " + usernameMap.get(profile - 1));
-        }
-        if (profiles.isEmpty()) {
+        if (profiles == null || profiles.isEmpty()) {
             System.out.println("Sorry! There is no profile to return to you at this time.");
-            System.out.println("Goodbye!");
-            System.exit(0);
+            //System.out.println("Goodbye!");
+            return;
+            //System.exit(0);
         }
+        System.out.println("Here is the profile of your friend(s)");
+        for (int profileID : profiles) {
+            User username = usernameMap.get(profileID);
+            if (username != null) {
+                System.out.println(profileID + ". " + username);
+            }else{
+                System.out.println(profileID + ". [Username not found]");
+            }
+            //System.out.println((profileID) + ". " + usernameMap.get(profileID - 1));
+        }
+        
     }
 
     private ArrayList<Integer> getFriendProfile(int userId) {
         ArrayList<Integer> profile = new ArrayList<>();
-        friendGraph.BFS(userId);
-        for (int i = 1; i <= friendGraph.getNumVertices; i++) {
-            if (friendGraph.getDistance(i) > 1) {
+        Graph.BFS(userId);
+        for (int i = 1; i <= Graph.getNumVertices(); i++) {
+            if (Graph.getDistance(i) > 1) {
                 profile.add(i);
             }
         }
@@ -185,5 +216,6 @@ public class UserInterface {
             System.out.println("Invalid username.");
         }
     }
-}
 
+    
+}
