@@ -115,6 +115,10 @@ public class HashTable<T> {
         }
         return null;
     }
+    
+    public LinkedList getRow(int rowNum){
+        return table.get(rowNum);
+    }
 
     /**
      * Accesses a specified element in the table.
