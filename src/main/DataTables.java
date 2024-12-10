@@ -1,3 +1,6 @@
+
+package main;
+
 import dataStructures.HashTable;
 
 public class DataTables {
