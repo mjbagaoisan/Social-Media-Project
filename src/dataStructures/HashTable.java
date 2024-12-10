@@ -1,10 +1,14 @@
+package dataStructures;
+
 /**
  * HashTable.java
- * @author Edward Lu
+ * @author Marc Jowell Bagaoisan
  * @author Partner's name
  * CIS 22C, Lab 13.2
  */
+
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class HashTable<T> {
 
@@ -22,13 +26,13 @@ public class HashTable<T> {
      */
     public HashTable(int size) throws IllegalArgumentException {
         if (size <= 0) {
-            throw new IllegalArgumentException("Size must be greater than 0");
+            throw new IllegalArgumentException("size must be > 0");
         }
+        numElements = 0;
         table = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-            table.add(new LinkedList<>());
+            table.add(new LinkedList<T>());
         }
-        numElements = 0;    
     }
 
     /**
@@ -38,13 +42,22 @@ public class HashTable<T> {
      * @param array an array of elements to insert
      * @param size the size of the Table
      * @precondition size > 0
-     * @throws IllegalArgumentException when size <= 0
+     * @throws IllegalArgumentException when <=0
      */
     public HashTable(T[] array, int size) throws IllegalArgumentException {
         this(size);
+
+        if (size <= 0) {
+            throw new IllegalArgumentException("size must be > 0");
+        }
         if (array != null) {
-            for (T element : array) {
-                add(element);
+            numElements = 0;
+            table = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
+                table.add(new LinkedList<T>());
+            }
+            for (int i = 0; i < array.length; i++) {
+                this.add(array[i]);
             }
         }
     }
@@ -64,15 +77,15 @@ public class HashTable<T> {
     /**
      * Counts the number of elements at this index.
      * @param index the index in the table
-     * @precondition <you fill in here>
+     * @precondition 0 <= index < table.size()
      * @return the count of elements at this index
      * @throws IndexOutOfBoundsException when the precondition is violated
      */
     public int countBucket(int index) throws IndexOutOfBoundsException {
         if (index < 0 || index >= table.size()) {
-            throw new IndexOutOfBoundsException("Invalid index");
+            throw new IndexOutOfBoundsException("countBucket: index is out of bounds");
         }
-        return table.get(index).getLength();
+        return table.get(index).size();
     }
 
     /**
@@ -85,24 +98,20 @@ public class HashTable<T> {
 
     /**
      * Accesses a specified key in the Table
-     * @param elmt the key to search for
+     * @param t the key to search for
      * @return the value to which the specified key is mapped,
      * or null if this table contains no mapping for the key.
-     * @precondition <you fill in here>
+     * @precondition elmt != null
      * @throws NullPointerException when the precondition is violated.
      */
     public T get(T elmt) throws NullPointerException {
         if (elmt == null) {
-            throw new NullPointerException("Element cannot be null");
+            throw new NullPointerException("get: elmt is null");
         }
-        int index = hash(elmt);
-        LinkedList<T> bucket = table.get(index);
-        bucket.positionIterator();
-        while (!bucket.offEnd()) {
-            if (bucket.getIterator().equals(elmt)) {
-                return bucket.getIterator();
+        for (int i = 0; i < table.size(); i++) {
+            if (table.get(i).contains(elmt)) {
+                return table.get(i).get(table.get(i).indexOf(elmt));
             }
-            bucket.advanceIterator();
         }
         return null;
     }
@@ -112,18 +121,17 @@ public class HashTable<T> {
      * @param elmt the element to locate
      * @return the bucket number where the element
      * is located or -1 if it is not found.
-     * @precondition <you fill in here>
+     * @precondition elmt != null
      * @throws NullPointerException when the precondition is violated.
      */
     public int find(T elmt) throws NullPointerException{
         if (elmt == null) {
-            throw new NullPointerException("Element cannot be null");
+            throw new NullPointerException("find: elmt is null");
         }
-        int index = hash(elmt);
-        LinkedList<T> bucket = table.get(index);
-        
-        if (bucket.findIndex(elmt) != -1) {
-            return index;
+        for (int i = 0; i < table.size(); i++) {
+            if (table.get(i).contains(elmt)) {
+                return i;
+            }
         }
         return -1;
     }
@@ -137,9 +145,15 @@ public class HashTable<T> {
      */
     public boolean contains(T elmt) throws NullPointerException {
         if (elmt == null) {
-            throw new NullPointerException("Element cannot be null");
+            throw new NullPointerException("contains: elmt is null");
         }
-        return find(elmt) != -1;
+
+        for (int i = 0; i < table.size(); i++) {
+            if (table.get(i).contains(elmt)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** Mutators */
@@ -148,39 +162,31 @@ public class HashTable<T> {
      * Inserts a new element in the table at the end of the chain
      * of the correct bucket.
      * @param elmt the element to insert
-     * @precondition <you fill in here>
+     * @precondition elmt != null
      * @throws NullPointerException when the precondition is violated.
      */
     public void add(T elmt) throws NullPointerException {
         if (elmt == null) {
-            throw new NullPointerException("Element cannot be null");
+            throw new NullPointerException("add: elmt is null");
         }
-        int index = hash(elmt);
-        table.get(index).addLast(elmt);
+        int bucket = hash(elmt);
+        table.get(bucket).addLast(elmt);
         numElements++;
     }
 
     /**
      * Removes the given element from the table.
      * @param elmt the element to remove
-     * @precondition <you fill in here>
+     * @precondition elmt != null
      * @return whether elmt exists and was removed from the table
      * @throws NullPointerException when the precondition is violated
      */
     public boolean delete(T elmt) throws NullPointerException {
         if (elmt == null) {
-            throw new NullPointerException("Element cannot be null");
+            throw new NullPointerException("delete: elmt is null");
         }
-        int index = hash(elmt);
-        LinkedList<T> bucket = table.get(index);
-        int elmtIndex = bucket.findIndex(elmt);
-        if (elmtIndex != -1) {
-            bucket.advanceIteratorToIndex(elmtIndex);
-            bucket.removeIterator();
-            numElements--;
-            return true;
-        }
-        return false;
+        int bucket = hash(elmt);
+        return table.get(bucket).remove(elmt);
     }
 
     /**
@@ -188,8 +194,8 @@ public class HashTable<T> {
      * constructor has just been called.
      */
     public void clear() {
-        for (LinkedList<T> bucket : table) {
-            bucket.clear();
+        for (int i = 0; i < table.size(); i++) {
+            table.get(i).clear();
         }
         numElements = 0;
     }
@@ -202,7 +208,6 @@ public class HashTable<T> {
      */
     public double getLoadFactor() {
         return (double) numElements / table.size();
-
     }
 
     /**
@@ -210,28 +215,32 @@ public class HashTable<T> {
      * @param bucket the index in the table
      * @return a String of elements, separated by spaces with a new line character
      *         at the end
-     * @precondition <you fill in here>
+     * @precondition 0 <= bucket < table.size()
      * @throws IndexOutOfBoundsException when bucket is
      * out of bounds
      */
     public String bucketToString(int bucket) throws IndexOutOfBoundsException {
         if (bucket < 0 || bucket >= table.size()) {
-            throw new IndexOutOfBoundsException("Invalid bucket index");
+            throw new IndexOutOfBoundsException("bucketToString: bucket is out of bounds");
         }
-        StringBuilder result = new StringBuilder();
+
         LinkedList<T> list = table.get(bucket);
-        if (list.isEmpty()) {
-            return "\n";
+        StringBuilder result = new StringBuilder();
+        for (T elmt : list) {
+            result.append(elmt).append(" ");
         }
-        list.positionIterator();
-        while (!list.offEnd()) {
-            result.append(list.getIterator()).append(" ");
-            list.advanceIterator();
-        }
-        result.append("\n");
-        return result.toString();
+
+        return result.toString() + "\n";
+
     }
 
+    /**
+     * Creates a String of the bucket number followed by a colon followed by
+     * the first element at each bucket followed by a new line. For empty buckets,
+     * add the bucket number followed by a colon followed by empty.
+     *
+     * @return a String of all first elements at each bucket.
+     */
     /**
      * Creates a String of the bucket number followed by a colon followed by
      * the first element at each bucket followed by a new line. For empty buckets,
@@ -242,16 +251,20 @@ public class HashTable<T> {
     public String rowToString() {
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < table.size(); i++) {
-            result.append(i).append(": ");
-            if (table.get(i).isEmpty()) {
-                result.append("empty");
+            LinkedList<T> list = table.get(i);
+            if (list.isEmpty()) {
+                result.append("Bucket ").append(i).append(": empty\n");
             } else {
-                result.append(table.get(i).getFirst());
+                // Only append the first element in the bucket
+                result.append("Bucket ").append(i).append(": ").append(list.getFirst()).append("\n");
             }
-            result.append("\n");
         }
         return result.toString();
     }
+
+
+
+
 
     /**
      * Starting at the 0th bucket, and continuing in order until the last
@@ -263,9 +276,15 @@ public class HashTable<T> {
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
-        for (int i = 0; i < table.size(); i++) {
-            result.append(bucketToString(i));
+        for (LinkedList<T> list : table) {
+            if (!list.isEmpty()) {
+                for (T element : list) {
+                    result.append(element).append(" ");
+                }
+                result.append("\n");
+            }
         }
-        return result.toString();
-   }
+
+        return result.toString() + "\n";
+    }
 }
