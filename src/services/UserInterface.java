@@ -57,7 +57,7 @@ public class UserInterface {
         String password = scanner.nextLine();
 
         //Authenticate user using the DataTables class
-        String authenticatedUser = dataTables.authenticate(password);
+        String authenticatedUser = dataTables.authenticate(username,password);
         if (!authenticatedUser.equals("invalid")) {
             loggedInUser = new User("First", "Last", username, password, loggedInUser.getId(), "City", new LinkedList<>(), new BST<>());
             if (loggedInUser != null) {
