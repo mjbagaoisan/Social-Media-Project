@@ -1,49 +1,22 @@
 package services;
 
 import main.User;
+import main.FriendGraph;
 import java.io.*;
 import java.util.*;
-
-class Graph {
-    private Map<Integer, Set<Integer>> adjList;
-
-    public Graph() {
-        this.adjList = new HashMap<>();
-    }
-
-    public void addEdge(int userId1, int userId2) {
-        adjList.putIfAbsent(userId1, new HashSet<>());
-        adjList.putIfAbsent(userId2, new HashSet<>());
-        adjList.get(userId1).add(userId2);
-        adjList.get(userId2).add(userId1); // Undirected graph
-    }
-    public void removeEdge(int userId1, int userId2){
-        if (adjList.containsKey(userId1)){
-            adjList.get(userId1).remove(userId1);
-        }
-        if (adjList.containsKey(userId2)){
-            adjList.get(userId2).remove(userId2);
-        }
-    }
-
-
-    public Set<Integer> getFriends(int userId) {
-        return adjList.getOrDefault(userId, Collections.emptySet());
-    }
-}
 
 public class UserInterface {
     private Scanner scanner;
     private Map<String, User> usernameMap;
     private Map<String, List<User>> interestMap;
-    private Graph friendGraph;
+    private FriendGraph friendGraph;
     private User loggedInUser;
 
     public UserInterface() {
         this.scanner = new Scanner(System.in);
         this.usernameMap = new HashMap<>();
         this.interestMap = new HashMap<>();
-        this.friendGraph = new Graph();
+        this.friendGraph = new FriendGraph();
     }
 
 
@@ -98,8 +71,9 @@ public class UserInterface {
             return;
         }
 
-        User newUser = new User(firstName, lastName, username, password); // Update the correct constructor from User.java
+        User newUser = new User(firstName, lastName, username, password, id, city, interests, friends);
         usernameMap.put(username, newUser);
+        friendGraph.addUser(newUser.getId(), newUser.getFullName());
         System.out.println("Account created successfully!");
     }
 
@@ -107,6 +81,7 @@ public class UserInterface {
         while (true) {
             System.out.println("1. View Friends");
             System.out.println("2. Add Friend");
+            System.out.println("3. Remove Friend");
             System.out.println("3. Logout");
             System.out.print("Choose an option: ");
             int choice = scanner.nextInt();
@@ -115,7 +90,8 @@ public class UserInterface {
             switch (choice) {
                 case 1 -> viewFriends();
                 case 2 -> addFriend();
-                case 3 -> {
+                case 3 -> removeFriend();
+                case 4 -> {
                     loggedInUser = null;
                     return;
                 }
@@ -129,32 +105,33 @@ public class UserInterface {
         if (friends.isEmpty()) {
             System.out.println("No friends yet.");
         } else {
-            for (int friendId : friends) {
-                User friend = null;
-                for (User user : usernameMap.values()) {
-                    if (user.getId() == friendId) {
-                        friend = user;
-                        break;
-                    }
-                }
-                if (friend != null) {
-                    System.out.println(friend.getFullName());
-                } else {
-                    System.out.println("Unknown User");
-                }
-            }
-        }
-        while (true) {
-            System.out.println();
-            System.out.println("1. Remove Friends");
-            System.out.println("2. Add Friends");
-            int choice = scanner.nextInt();
-            scanner.nextLine();
-            switch (choice) {
-                case 1 -> viewProfile();
-                case 2 -> removeFriend();
-                case 3 -> addFriend();
-            }
+            friends.forEach(System.out::println);
+            /**for (int friendId : friends) {
+             User friend = null;
+             for (User user : usernameMap.values()) {
+             if (user.getId() == friendId) {
+             friend = user;
+             break;
+             }
+             }
+             if (friend != null) {
+             System.out.println(friend.getFullName());
+             } else {
+             System.out.println("Unknown User");
+             }
+             }
+             }
+             while (true) {
+             System.out.println();
+             System.out.println("1. Remove Friends");
+             System.out.println("2. Add Friends");
+             int choice = scanner.nextInt();
+             scanner.nextLine();
+             switch (choice) {
+             case 1 -> viewProfile();
+             case 2 -> removeFriend();
+             case 3 -> addFriend();
+             }*/
         }
     }
 
@@ -189,7 +166,7 @@ public class UserInterface {
         User friend = usernameMap.get(username);
 
         if (friend != null && friend != loggedInUser) {
-            friendGraph.addEdge(loggedInUser.getId(), friend.getId());
+            friendGraph.addFriend(loggedInUser.getId(), friend.getId());
             System.out.println(friend.getFullName() + " added as a friend.");
         } else {
             System.out.println("Invalid username.");
@@ -202,7 +179,7 @@ public class UserInterface {
         User friend = usernameMap.get(username);
 
         if (friend != null && friend == loggedInUser) {
-            friendGraph.removeEdge(loggedInUser.getId(), friend.getId());
+            friendGraph.removeFriend(loggedInUser.getId(), friend.getId());
             System.out.println(friend.getFullName() + " removed as a friend.");
         } else {
             System.out.println("Invalid username.");
