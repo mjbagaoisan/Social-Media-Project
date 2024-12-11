@@ -3,7 +3,7 @@ package main;
 import dataStructures.BST;
 
 import java.io.Serializable;
-import dataStructures.LinkedList;
+import java.util.LinkedList;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
