@@ -24,11 +24,11 @@ public class UserInterface {
         this.scanner = new Scanner(System.in);
         this.userBST = userBST;
         this.interestManager = interestManager;
-
-        mainMenu();
-
     }
 
+    public void startUI() {
+        mainMenu();
+    }
 
     private void mainMenu() {
         while (true) {

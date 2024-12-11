@@ -56,6 +56,8 @@ public class FileManager {
                     }
                 }
 
+                
+
                 String city = scanner.nextLine().trim();
                 int numInterests = Integer.parseInt(scanner.nextLine().trim());
 
