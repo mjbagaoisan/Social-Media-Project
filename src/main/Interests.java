@@ -8,17 +8,19 @@ import dataStructures.LinkedList;
 public class Interests {
 
     private int interest;
-    private String interestName;
-    private User user;
+    private final String interestName;
+    private final User user;
     private LinkedList<User> users;
 
     public Interests(String interest, User user){
         this.user = user;
+        this.interestName = interest;  // Set interest nam
         try{
             this.interest = Math.abs(strToInteger(interest));
         } catch (NoSuchAlgorithmException e) {
             System.err.println("Hashing algorithm not found: " + e.getMessage());
         }
+        this.users = new LinkedList<>();
     }
     
     @Override public int hashCode() {
@@ -43,12 +45,12 @@ public class Interests {
     @Override public boolean equals(Object obj) {
 		if(this == obj) {
 			return true;
-		} else if (!(obj instanceof Interests)) {
+		} else if (!(obj instanceof Interests other)) {
 			return false;
 		} else {
-			Interests stu = (Interests) obj;
-			return this.interest == stu.interest && stu.user.equals(this.user);
-		}
+            return this.interest == other.interest && this.user.equals(other.user);
+
+        }
 	}
     @Override
     public String toString() {
@@ -63,6 +65,9 @@ public class Interests {
      */
     public LinkedList<User> searchUsersByInterest(String interest) {
         LinkedList<User> result = new LinkedList<>();
+        if (users == null) {
+            users = new LinkedList<>();
+        }
 
         // Iterate through all users in the users list
         users.positionIterator();
