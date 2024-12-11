@@ -7,6 +7,7 @@ import java.util.*;
 import dataStructures.BST;
 import dataStructures.LinkedList;
 import main.InterestManager;
+import services.FileManager;
 
 public class UserInterface {
     private Scanner scanner;
@@ -15,6 +16,7 @@ public class UserInterface {
     private User loggedInUser;
     private UserBST userBST;
     private InterestManager interestManager;
+    private FileManager fileManager;
 
     public UserInterface() {
         this.dataTables = new DataTables(30);
@@ -112,11 +114,9 @@ public class UserInterface {
     private void userMenu() {
         while (true) {
             System.out.println("1. View Friends");
-            System.out.println("2. Add Friend");
-            System.out.println("3. Remove Friend");
-            System.out.println("4. Friend Recommendations");
-            System.out.println("5. View Friends' Interests");
-            System.out.println("6. Logout");
+            System.out.println("2. Make New Friends");
+            System.out.println("3. Friend Suggestions");
+            System.out.println("4. Logout and Save Data");
             System.out.print("Choose an option: ");
             int choice = scanner.nextInt();
             scanner.nextLine(); // Consume newline
@@ -126,18 +126,13 @@ public class UserInterface {
                 viewFriends();
                 break;
                 case 2: 
-                addFriend();
+                addFriend(); // Change to makeNewFriend
                 break;
                 case 3:
-                removeFriend();
-                break;
-                case 4: 
                 recommendFriends();
                 break;
-                case 5:
-                viewInterest(friendName); // Pass the friend's full name as a parameter and make a local variable
-                break; 
-                case 6:{
+                case 4:{
+                    FileManager.saveData(userBST, dataTables);
                     loggedInUser = null;
                     return;
                 }
@@ -147,31 +142,55 @@ public class UserInterface {
     }
 
     private void viewFriends() {
-        System.out.println("Your friends:");
+//        System.out.println("Your friends:");
+//        friendGraph.getFriends(loggedInUser.getId());
+
+        while (true) {
+            System.out.println("1. View Friends (Sorted by Name)");
+            System.out.println("2. Search for a Friend");
+            System.out.print("Choose an option: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            switch (choice) {
+                case 1:
+                viewFriendsByName();
+                break;
+                case 2:
+                searchForFriend();
+                break;
+                default:
+                System.out.println("Invalid choice.");
+            }
+        }
+    }
+
+    public void viewFriendsByName() {
+        System.out.println("Your friends (sorted by name):");
         friendGraph.getFriends(loggedInUser.getId());
-        
     }
 
     /**
-     * Displays the interests of a friend's profile based on their full name.
+     * Displays the interests of a friend's profile based on the passed User object.
      *
-     * @param friendName The full name of the friend whose interests are to be viewed.
+     * @param friend The User object representing the friend whose interests are to be viewed.
      */
-    public void viewInterest(String friendName) {
-        ArrayList<User> matchingUsers = userBST.searchUsersByName(friendName);
+    public void viewInterest(User friend) {
+        String nameOfFriend = friend.getFullName();
+        ArrayList<User> matchingUsers = userBST.searchUsersByName(nameOfFriend);
 
         if (matchingUsers.isEmpty()) {
-            System.out.println("No users found with the name: " + friendName);
+            System.out.println("No users found with the name: " + nameOfFriend);
             return;
         }
 
-        User friend = matchingUsers.get(0);
-        LinkedList<Interests> friendInterests = interestManager.getInterestsByUserID(friend.getId());
+        User actualFriend = matchingUsers.get(0); // Can be improved if we handle multiple matches
+        LinkedList<Interests> friendInterests = interestManager.getInterestsByUserID(actualFriend.getId());
 
         if (friendInterests.isEmpty()) {
-            System.out.println(friend.getFullName() + " has no interests listed.");
+            System.out.println(actualFriend.getFullName() + " has no interests listed.");
         } else {
-            System.out.println(friend.getFullName() + "'s interests:");
+            System.out.println(actualFriend.getFullName() + "'s interests:");
             friendInterests.positionIterator();
             while (!friendInterests.offEnd()) {
                 try {
@@ -184,6 +203,15 @@ public class UserInterface {
                 }
             }
         }
+    }
+
+    private void viewFriendProfile(User friendName) {
+        System.out.println("Username: " + friendName.getUsername());
+        System.out.println("ID: " + friendName.getId());
+        System.out.println("Full Name: " + friendName.getFullName());
+        System.out.println("City: " + friendName.getCity());
+        System.out.println("Interests:");
+        viewInterest(friendName);
     }
 
 

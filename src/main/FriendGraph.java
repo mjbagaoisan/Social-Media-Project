@@ -229,6 +229,8 @@ public class FriendGraph {
             return;
         }
 
+        // Need to sort by name 
+
         try {
             LinkedList<Integer> friendsList = friendNetwork.getAdjacencyList(vertex);
             System.out.println(getUserNameById(user) + "'s Friends:");
