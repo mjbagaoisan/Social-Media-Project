@@ -3,7 +3,6 @@ package main;
 
 import dataStructures.HashTable;
 import dataStructures.LinkedList;
-import dataStructures.BST;
 
 public class DataTables {
 
