@@ -94,6 +94,9 @@ public class UserInterface {
         User newUser = new User(firstName, lastName, username, password, id, "City", interests, new BST<>());
         // Assuming register doesn't return anything, remove the success check.
         dataTables.register(username, password);
+        for(String interest : interests){
+            dataTables.userHasInterest(interest, newUser);
+        }
         System.out.println("Account created successfully!");
         loggedInUser = newUser;
     }
@@ -104,7 +107,8 @@ public class UserInterface {
             System.out.println("2. Add Friend");
             System.out.println("3. Remove Friend");
             System.out.println("4. Friend Recommendations");
-            System.out.println("5. Logout");
+            System.out.println("5. View Friends' Interests");
+            System.out.println("6. Logout");
             System.out.print("Choose an option: ");
             int choice = scanner.nextInt();
             scanner.nextLine(); // Consume newline
@@ -122,7 +126,10 @@ public class UserInterface {
                 case 4: 
                 recommendFriends();
                 break;
-                case 5: {
+                case 5:
+                viewInterest();
+                break; 
+                case 6:{
                     loggedInUser = null;
                     return;
                 }
@@ -136,12 +143,18 @@ public class UserInterface {
         friendGraph.getFriends(loggedInUser.getId());
         
     }
+
+    private void viewInterest() {
+       
+    }
+    
     
     private void addFriend() {
         System.out.print("Enter username of friend: ");
         String username = scanner.nextLine();
         User friend = new User("First", "Last", username, "password", generateUserId(), "City", new LinkedList<>(), new BST<>());
         FriendGraph.addFriend(loggedInUser.getId(), friend.getId());
+        System.out.println(friend.getFullName() + " added as a friend.");
         
     }
 
@@ -150,6 +163,7 @@ public class UserInterface {
         String username = scanner.nextLine();
         User friend = new User("First", "Last", username, "password", generateUserId(), "City", new LinkedList<>(), new BST<>());
         friendGraph.removeFriend(loggedInUser.getId(), friend.getId());
+        System.out.println(friend.getFullName() + " removed as a friend.");
         
     }
 
@@ -160,6 +174,7 @@ public class UserInterface {
     private int generateUserId(){
         return loggedInUser == null ? 1 : loggedInUser.getId() + 1;
     }
+    
 
     
 }
