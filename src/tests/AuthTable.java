@@ -1,3 +1,6 @@
+package tests;
+import dataStructures.HashTable;
+
 import java.util.Scanner;
 
 public class PasswordTable {

@@ -198,7 +198,7 @@ public class GraphTest {
         try {
             // The code calls findRecommendedFriends which returns empty list currently.
             // So it should print the "Sorry!..." message.
-            fg.getReccomendedFriends(3); // Diana(3), presumably no recommendations
+            fg.processUserFriendRecommendations(3); // Diana(3), presumably no recommendations
             msg("PASS: getReccomendedFriends ran without exceptions (check console output).");
         } catch (Exception e) {
             msg("FAIL: Exception when testing getReccomendedFriends: " + e.getMessage());

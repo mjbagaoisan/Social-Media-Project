@@ -7,6 +7,7 @@ import java.security.NoSuchAlgorithmException;
 public class Interests{
 
     private int interest;
+    private String interestName;
     private User user;
 
     public Interests(String interest, User user){
@@ -26,6 +27,10 @@ public class Interests{
         return user;
     }
 
+    public String getInterestName() {
+        return interestName;
+    }
+
     public static int strToInteger(String password) throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] hashBytes = digest.digest(password.getBytes());
@@ -43,5 +48,9 @@ public class Interests{
 			return this.interest == stu.interest && stu.user.equals(this.user);
 		}
 	}
+    @Override
+    public String toString() {
+        return interestName;
+    }
 	
 }
