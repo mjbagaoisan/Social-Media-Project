@@ -36,7 +36,7 @@ public class FriendGraph {
      */
     public FriendGraph() {
         try {
-            friendNetwork = new Graph(78);
+            friendNetwork = new Graph(100);
         } catch (IllegalArgumentException e) {
             System.err.println("Failed to initialize Graph: " + e.getMessage());
             friendNetwork = null;
@@ -59,17 +59,6 @@ public class FriendGraph {
         }
 
         int userId = user.getId(); // Assuming User class has getId() method
-        if (userId < 0 || userId >= 78) { // Ensure User ID is within Graph bounds
-            System.err.println("User ID " + userId + " is out of bounds. Must be between 0 and 77.");
-            return;
-        }
-
-        // Map User ID to internal index (same as User ID)
-        if (userIds.contains(userId)) {
-            System.err.println("User ID " + userId + " already exists.");
-            return;
-        }
-
         userIds.add(userId);
         names.add(user.getFullName());
 
@@ -140,21 +129,17 @@ public class FriendGraph {
      * @param user2 The ID of the second user.
      */
     public void addFriend(int user1, int user2) {
+        int vertex1 = user1 + 1; // Convert to 1-based index
+        int vertex2 = user2 + 1;
         if (friendNetwork == null) {
             System.err.println("Graph not initialized.");
-            return;
-        }
-
-        // Validate user IDs
-        if (!userIds.contains(user1) || !userIds.contains(user2)) {
-            System.err.println("One or both User IDs provided do not exist.");
             return;
         }
 
         try {
             LinkedList<Integer> friendsList = friendNetwork.getAdjacencyList(user1);
             if (!friendsList.contains(user2)) { // Check if already friends
-                friendNetwork.addUndirectedEdge(user1, user2);
+                friendNetwork.addUndirectedEdge(vertex1, vertex2);
                 System.out.println(getUserNameById(user1) + " and " + getUserNameById(user2) + " are now friends.");
             } else {
                 System.out.println(getUserNameById(user1) + " and " + getUserNameById(user2) + " are already friends.");
@@ -172,6 +157,8 @@ public class FriendGraph {
      * @param user2 The ID of the second user.
      */
     public void removeFriend(int user1, int user2) {
+        int vertex1 = user1 + 1; // Convert to 1-based index
+        int vertex2 = user2 + 1;
         if (friendNetwork == null) {
             System.err.println("Graph not initialized.");
             return;
@@ -187,10 +174,10 @@ public class FriendGraph {
         boolean removedFromUser2 = false;
 
         try {
-            LinkedList<Integer> friendsUser1 = friendNetwork.getAdjacencyList(user1);
+            LinkedList<Integer> friendsUser1 = friendNetwork.getAdjacencyList(vertex1);
             friendsUser1.positionIterator();
             while (!friendsUser1.offEnd()) {
-                if (friendsUser1.getIterator() == user2) {
+                if (friendsUser1.getIterator() == vertex2) {
                     friendsUser1.removeIterator(); // Remove friend2 from user1's list
                     removedFromUser1 = true;
                     break;
@@ -202,10 +189,10 @@ public class FriendGraph {
         }
 
         try {
-            LinkedList<Integer> friendsUser2 = friendNetwork.getAdjacencyList(user2);
+            LinkedList<Integer> friendsUser2 = friendNetwork.getAdjacencyList(vertex2);
             friendsUser2.positionIterator();
             while (!friendsUser2.offEnd()) {
-                if (friendsUser2.getIterator() == user1) {
+                if (friendsUser2.getIterator() == vertex1) {
                     friendsUser2.removeIterator(); // Remove friend1 from user2's list
                     removedFromUser2 = true;
                     break;
@@ -230,6 +217,7 @@ public class FriendGraph {
      * @param user The ID of the user whose friends are to be displayed.
      */
     public void getFriends(int user) {
+        int vertex = user + 1;
         if (friendNetwork == null) {
             System.err.println("Graph not initialized.");
             return;
@@ -242,7 +230,7 @@ public class FriendGraph {
         }
 
         try {
-            LinkedList<Integer> friendsList = friendNetwork.getAdjacencyList(user);
+            LinkedList<Integer> friendsList = friendNetwork.getAdjacencyList(vertex);
             System.out.println(getUserNameById(user) + "'s Friends:");
             if (friendsList.getLength() == 0) {
                 System.out.println("No friends");
@@ -276,6 +264,8 @@ public class FriendGraph {
      * @param user2 The ID of the second user.
      */
     public void getMutualFriends(int user1, int user2) {
+        int vertex1 = user1 + 1; // Convert to 1-based index
+        int vertex2 = user2 + 1; // Convert to 1-based index
         if (friendNetwork == null) {
             System.err.println("Graph not initialized.");
             return;
@@ -290,8 +280,8 @@ public class FriendGraph {
         ArrayList<Integer> mutualFriends = new ArrayList<>();
 
         try {
-            LinkedList<Integer> friendsUser1 = friendNetwork.getAdjacencyList(user1);
-            LinkedList<Integer> friendsUser2 = friendNetwork.getAdjacencyList(user2);
+            LinkedList<Integer> friendsUser1 = friendNetwork.getAdjacencyList(vertex1);
+            LinkedList<Integer> friendsUser2 = friendNetwork.getAdjacencyList(vertex2);
 
             // Collect friends of user1
             ArrayList<Integer> user1Friends = new ArrayList<>();
@@ -334,6 +324,8 @@ public class FriendGraph {
      * @return True if the users are friends, otherwise false.
      */
     public boolean isFriend(int user1, int user2) {
+        int vertex1 = user1 + 1; // Convert to 1-based index
+        int vertex2 = user2 + 1; // Convert to 1-based index
         if (friendNetwork == null) {
             System.err.println("Graph not initialized.");
             return false;
@@ -346,10 +338,10 @@ public class FriendGraph {
         }
 
         try {
-            LinkedList<Integer> friends = friendNetwork.getAdjacencyList(user1);
+            LinkedList<Integer> friends = friendNetwork.getAdjacencyList(vertex1);
             friends.positionIterator();
             while (!friends.offEnd()) {
-                if (friends.getIterator() == user2) { // Check if user2 is in user1's friends
+                if (friends.getIterator() == vertex2) { // Check if user2 is in user1's friends
                     return true;
                 }
                 friends.advanceIterator();
@@ -369,20 +361,21 @@ public class FriendGraph {
      * @param userId Selected user ID.
      */
     public void processUserFriendRecommendations(Scanner input, int userId) {
+        int vertexId = userId + 1;
         if (friendNetwork == null) {
             System.err.println("Graph not initialized.");
             return;
         }
 
         // Validate user ID
-        if (!userIds.contains(userId)) {
+        if (!userIds.contains(vertexId)) {
             System.err.println("Invalid user ID provided.");
             return;
         }
 
         // Perform BFS to calculate distances
         try {
-            friendNetwork.BFS(userId);
+            friendNetwork.BFS(vertexId);
         } catch (IndexOutOfBoundsException e) {
             System.err.println("Error performing BFS: " + e.getMessage());
             return;
@@ -392,7 +385,7 @@ public class FriendGraph {
         LinkedList<Integer> directFriendsList;
 
         try {
-            directFriendsList = friendNetwork.getAdjacencyList(userId);
+            directFriendsList = friendNetwork.getAdjacencyList(vertexId);
         } catch (IndexOutOfBoundsException e) {
             System.err.println("Error retrieving direct friends: " + e.getMessage());
             return;
@@ -424,7 +417,7 @@ public class FriendGraph {
                 continue;
             }
 
-            int sharedInterests = calculateSharedInterests(userId, potentialUserId);
+            int sharedInterests = calculateSharedInterests(vertexId, potentialUserId);
 
             if (distance > 0 && distance < Integer.MAX_VALUE) {
                 recommendations.add(new FriendRecommendation(potentialUserId, distance, sharedInterests));
