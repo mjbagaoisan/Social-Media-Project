@@ -5,13 +5,14 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Scanner;
 import java.util.ArrayList;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 
 public class GraphTest {
-    private PrintWriter testFeedback; 
+    private PrintWriter testFeedback;
 
     public static void main(String[] args) throws Exception {
         File file = new File("graph_test_feedback.txt");
@@ -176,9 +177,9 @@ public class GraphTest {
     private int testGetMutualFriends(FriendGraph fg) {
         int errors = 0;
         try {
-            // Setup: 
+            // Setup:
             // Alice(0) is friends with Bob(1) and Charlie(2).
-            // Make Bob(1) also friends with Charlie(2), so that 
+            // Make Bob(1) also friends with Charlie(2), so that
             // mutual friends between Alice(0) and Bob(1) would be Charlie(2).
             fg.addFriend(1, 2);
 
@@ -198,7 +199,7 @@ public class GraphTest {
         try {
             // The code calls findRecommendedFriends which returns empty list currently.
             // So it should print the "Sorry!..." message.
-            fg.processUserFriendRecommendations(3); // Diana(3), presumably no recommendations
+            fg.processUserFriendRecommendations(new Scanner(System.in), 3); // Diana(3), presumably no recommendations
             msg("PASS: getReccomendedFriends ran without exceptions (check console output).");
         } catch (Exception e) {
             msg("FAIL: Exception when testing getReccomendedFriends: " + e.getMessage());
