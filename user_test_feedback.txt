@@ -1,0 +1,9 @@
+Starting User Tests...
+PASS: Successfully created a User instance.
+PASS: getFullName() returned expected value 'John Doe'.
+PASS: getUsername() returned expected value 'johndoe'.
+PASS: getPasswordHash() returned the expected hash for 'mypassword'.
+PASS: getCity() returned expected value 'New York'.
+PASS: Interests contain 'Reading' as expected.
+PASS: Interests contain 'Coding' as expected.
+All tests passed!

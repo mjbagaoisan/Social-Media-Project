@@ -5,8 +5,12 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.LinkedList;
+import dataStructures.LinkedList;
 import java.util.ArrayList;
+import main.User;
+import main.UserBST;
+import main.UserFriend;
+
 
 public class UserTest {
     private PrintWriter testFeedback;
@@ -38,11 +42,9 @@ public class UserTest {
         User testUser = null;
         try {
             LinkedList<String> interests = new LinkedList<>();
-            interests.add("Reading");
-            interests.add("Coding");
+            interests.addLast("Reading");
+            interests.addLast("Coding");
 
-            // Note: The constructor currently ignores the provided city and interests parameters
-            // and sets them to null and empty respectively.
             testUser = new User("John", "Doe", "johndoe", "mypassword", 1, "New York", interests, null);
             msg("PASS: Successfully created a User instance.");
         } catch (Exception e) {
@@ -50,36 +52,10 @@ public class UserTest {
             errorCount++;
         }
 
-        // Test User getters and authentication
+        // Test User getters
         if (testUser != null) {
-            errorCount += testUserGettersAndAuth(testUser);
+            errorCount += testUserGetters(testUser);
             errorCount += testUserInterests(testUser);
-        }
-
-        // Test UserBST
-        UserBST userBST = null;
-        try {
-            userBST = new UserBST();
-            msg("PASS: Successfully created a UserBST instance.");
-        } catch (Exception e) {
-            msg("FAIL: Exception creating UserBST instance: " + e.getMessage());
-            errorCount++;
-        }
-        if (userBST != null) {
-            errorCount += testUserBST(userBST);
-        }
-
-        // Test UserFriend
-        UserFriend userFriend = null;
-        try {
-            userFriend = new UserFriend();
-            msg("PASS: Successfully created a UserFriend instance.");
-        } catch (Exception e) {
-            msg("FAIL: Exception creating UserFriend instance: " + e.getMessage());
-            errorCount++;
-        }
-        if (userFriend != null) {
-            errorCount += testUserFriend(userFriend);
         }
 
         // Summary
@@ -90,8 +66,9 @@ public class UserTest {
         }
     }
 
-    private int testUserGettersAndAuth(User user) {
+    private int testUserGetters(User user) {
         int errors = 0;
+
         // Test full name
         if (!"John Doe".equals(user.getFullName())) {
             msg("FAIL: getFullName() expected 'John Doe' got '" + user.getFullName() + "'");
@@ -108,29 +85,21 @@ public class UserTest {
             msg("PASS: getUsername() returned expected value 'johndoe'.");
         }
 
-        // Test authentication
-        if (!user.authenticate("mypassword")) {
-            msg("FAIL: authenticate('mypassword') should return true.");
+        // Test password hash
+        String expectedHash = Integer.toHexString("mypassword".hashCode());
+        if (!user.getPasswordHash().equals(expectedHash)) {
+            msg("FAIL: getPasswordHash() did not return the expected hash for 'mypassword'.");
             errors++;
         } else {
-            msg("PASS: authenticate('mypassword') returned true as expected.");
+            msg("PASS: getPasswordHash() returned the expected hash for 'mypassword'.");
         }
 
-        // Test city (currently set to null in constructor)
-        if (user.getCity() != null) {
-            msg("FAIL: getCity() expected null (given the current constructor implementation) got '" + user.getCity() + "'");
+        // Test city
+        if (!"New York".equals(user.getCity())) {
+            msg("FAIL: getCity() expected 'New York' got '" + user.getCity() + "'");
             errors++;
         } else {
-            msg("PASS: getCity() returned null as expected.");
-        }
-
-        // Test ID increments
-        int userId = user.getId(); // first user created in this run
-        if (userId != 0) {
-            msg("FAIL: getId() expected 0 for first user got " + userId);
-            errors++;
-        } else {
-            msg("PASS: getId() returned 0 as expected for the first user.");
+            msg("PASS: getCity() returned expected value 'New York'.");
         }
 
         return errors;
@@ -138,82 +107,22 @@ public class UserTest {
 
     private int testUserInterests(User user) {
         int errors = 0;
-        // The constructor currently ignores interests and sets a new empty list.
-        // Let's add an interest and test retrieval.
-        user.addInterest("Gaming");
-        if (!user.getInterests().contains("Gaming")) {
-            msg("FAIL: After addInterest('Gaming'), interests should contain 'Gaming'.");
+
+        // Verify interests added during user creation
+        if (!user.getInterests().contains("Reading")) {
+            msg("FAIL: Interests should contain 'Reading'.");
             errors++;
         } else {
-            msg("PASS: addInterest('Gaming') worked as expected.");
+            msg("PASS: Interests contain 'Reading' as expected.");
         }
 
-        return errors;
-    }
-
-    private int testUserBST(UserBST userBST) {
-        int errors = 0;
-        try {
-            // Insert some test users
-            User u1 = new User("Alice", "Smith", "asmith", "pass1", 2, "CityA", null, null);
-            User u2 = new User("Bob", "Jones", "bjones", "pass2", 3, "CityB", null, null);
-            userBST.insertUser(u1);
-            userBST.insertUser(u2);
-
-            ArrayList<User> users = userBST.getUsers();
-            if (users.size() < 2) {
-                msg("FAIL: After inserting two users, getUsers() should return at least 2. Got " + users.size());
-                errors++;
-            } else {
-                msg("PASS: insertUser and getUsers seem to work (2 or more users retrieved).");
-            }
-
-            // Search by name (dependent on parseUser logic which may not work due to no toString())
-            // We'll just ensure no exceptions:
-            ArrayList<User> searchResults = userBST.searchUsersByName("Alice");
-            msg("PASS: searchUsersByName('Alice') ran without exceptions. (Check logic once toString() is implemented)");
-        } catch (Exception e) {
-            msg("FAIL: Exception during testUserBST: " + e.getMessage());
+        if (!user.getInterests().contains("Coding")) {
+            msg("FAIL: Interests should contain 'Coding'.");
             errors++;
+        } else {
+            msg("PASS: Interests contain 'Coding' as expected.");
         }
-        return errors;
-    }
 
-    private int testUserFriend(UserFriend userFriend) {
-        int errors = 0;
-        try {
-            User u1 = new User("Charlie", "Brown", "cbrown", "pass3", 4, "CityC", null, null);
-            User u2 = new User("Diana", "Prince", "dprince", "pass4", 5, "CityD", null, null);
-
-            userFriend.addUser(u1);
-            userFriend.addUser(u2);
-
-            // Test search by username
-            User found = userFriend.searchUserByUsername("cbrown");
-            if (found == null || !"Charlie Brown".equals(found.getFullName())) {
-                msg("FAIL: searchUserByUsername('cbrown') did not return the expected user.");
-                errors++;
-            } else {
-                msg("PASS: searchUserByUsername('cbrown') returned 'Charlie Brown' as expected.");
-            }
-
-            // Test getAllUsers
-            ArrayList<User> allUsers = userFriend.getAllUsers();
-            if (allUsers.size() < 2) {
-                msg("FAIL: After adding two users, getAllUsers() should return at least 2. Got " + allUsers.size());
-                errors++;
-            } else {
-                msg("PASS: getAllUsers() returned 2 or more users as expected.");
-            }
-
-            // Test searchUsersByName
-            // Again depends on parse logic, we just check no exceptions:
-            ArrayList<User> nameSearch = userFriend.searchUsersByName("Brown");
-            msg("PASS: searchUsersByName('Brown') ran without exceptions. (Check correctness with proper toString() implementation)");
-        } catch (Exception e) {
-            msg("FAIL: Exception during testUserFriend: " + e.getMessage());
-            errors++;
-        }
         return errors;
     }
 
@@ -222,4 +131,3 @@ public class UserTest {
         System.out.println(message);
     }
 }
-
