@@ -7,9 +7,9 @@ import java.security.NoSuchAlgorithmException;
 public class Interests implements Comparable<Interests> {
 
     private int interest;
-    private String user;
+    private User user;
 
-    public Interests(String interest, String user){
+    public Interests(String interest, User user){
         this.user = user;
         try{
             this.interest = Math.abs(strToInteger(interest));
@@ -23,7 +23,7 @@ public class Interests implements Comparable<Interests> {
 		return interest;
 	}
 
-    public String getUser(){
+    public User getUser(){
         return user;
     }
 

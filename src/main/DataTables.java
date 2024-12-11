@@ -1,7 +1,12 @@
 
 package main;
 
+import dataStructures.LinkedList;
 import dataStructures.HashTable;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 
 public class DataTables {
 
@@ -28,7 +33,7 @@ public class DataTables {
     // Authenticate a user
     public String authenticate(String username, String password) {
         AuthHolder res = AH.get(new AuthHolder(username, password));
-        if(AH.username.equals(username)){
+        if (res != null && res.getUsername().equals(username)){
             return "valid";
         }else{
             return "invalid";
@@ -37,38 +42,33 @@ public class DataTables {
     
 
     public void userHasInterest(String interest, User user){
-        Interest y = new Interest(interest, user);
+        Interests y = new Interests(interest, user);
         ih.add(y);
     }
 
-    public ArrayList<User> getUsersWithInterest(String interest){
-
+    public ArrayList<User> getUsersWithInterest(String interest) {
         ArrayList<User> users = new ArrayList<>();
-        try{
-            interest = Math.abs(strToInteger(interest));
+        int hashedInterest;
+
+        try {
+            hashedInterest = Math.abs(strToInteger(interest));
         } catch (NoSuchAlgorithmException e) {
             System.err.println("Hashing algorithm not found: " + e.getMessage());
+            return users;
         }
 
-        int row = interest%ts;
-        LinkedList _ = ih.getRow(row);
-        _.positionIterator();
-        while (!_.offEnd()) {
-            Interests m = (Interests) _.getIterator(); // Access the data at the iterator
-            users.add(_.getUser());
-            _.advanceIterator(); // Move the iterator to the next node
-        }
+        int row = hashedInterest % ts;
+
+        // missing logic
 
         return users;
-
     }
-    
+
 
     public static int strToInteger(String password) throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] hashBytes = digest.digest(password.getBytes());
         BigInteger hashInt = new BigInteger(1, hashBytes);
-        return hashInt.intValue(); 
+        return hashInt.intValue();
     }
-
 }
