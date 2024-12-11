@@ -229,7 +229,7 @@ public class FriendGraph {
             return;
         }
 
-        // Need to sort by name 
+        // Need to sort by name
 
         try {
             LinkedList<Integer> friendsList = friendNetwork.getAdjacencyList(vertex);
@@ -444,25 +444,6 @@ public class FriendGraph {
             FriendRecommendation rec = recommendations.get(i);
             System.out.println((i + 1) + ". " + getUserNameById(rec.userId) +
                     " (Distance: " + rec.distance + ", Shared Interests: " + rec.sharedInterests + ")");
-        }
-
-        System.out.println("\nEnter the number of a friend to add or -1 to quit:");
-        System.out.print("Enter your choice: ");
-        try {
-            int choice = input.nextInt();
-            if (choice == -1) {
-                System.out.println("\nGoodbye!");
-                return;
-            }
-            if (choice > 0 && choice <= recommendations.size()) {
-                FriendRecommendation selectedRec = recommendations.get(choice - 1);
-                addFriend(userId, selectedRec.userId);
-            } else {
-                System.out.println("Invalid choice.");
-            }
-        } catch (Exception e) {
-            System.err.println("Invalid input. Please enter a valid number.");
-            input.nextLine(); // Clear the invalid input
         }
     }
 

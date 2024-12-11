@@ -65,6 +65,38 @@ public class InterestManager {
         return userInterests;
     }
 
+    /**
+     * Searches for users who have a specific interest using a LinkedList.
+     *
+     * @param interestName the name of the interest to search for
+     * @return a LinkedList of user names who have the specified interest
+     */
+    public LinkedList<String> searchUsersByInterest(String interestName) {
+        LinkedList<String> usersWithInterest = new LinkedList<>();
+
+        interestsList.positionIterator();
+
+
+        while (!interestsList.offEnd()) {
+            try {
+                Interests currentInterest = interestsList.getIterator();
+
+
+                if (currentInterest.getInterestName().equalsIgnoreCase(interestName)) {
+                    usersWithInterest.addLast(currentInterest.getUser().getFullName());
+                }
+
+                interestsList.advanceIterator();
+            } catch (NoSuchElementException | NullPointerException e) {
+                System.err.println("Error while searching for users with interest: " + e.getMessage());
+                break;
+            }
+        }
+
+        return usersWithInterest;
+    }
+
+
 
     /**
      * Removes an interest for a user.
