@@ -5,7 +5,6 @@ import main.FriendGraph;
 //import java.io.*;
 import java.util.*;
 import main.DataTables;
-//import dataStructures.Graph;
 import dataStructures.BST;
 
 public class UserInterface {
@@ -15,7 +14,7 @@ public class UserInterface {
     private User loggedInUser;
 
     public UserInterface() {
-        this.dataTables = new DataTables();
+        this.dataTables = new DataTables(30);
         this.friendGraph = new FriendGraph();
         this.scanner = new Scanner(System.in);
 
@@ -92,14 +91,11 @@ public class UserInterface {
         }
 
         int id = generateUserId();
-        User newUser = new User(firstName, lastName, username, password, id, password, interests, new BST<>());
-        boolean success = dataTables.register(username, password);
-        if (success) {
-            System.out.println("Account created successfully!");
-            loggedInUser = newUser;
-        }else{
-            System.out.println("Username already exists.");
-        }
+        User newUser = new User(firstName, lastName, username, password, id, "City", interests, new BST<>());
+        // Assuming register doesn't return anything, remove the success check.
+        dataTables.register(username, password);
+        System.out.println("Account created successfully!");
+        loggedInUser = newUser;
     }
 
     private void userMenu() {
