@@ -1,23 +1,27 @@
 package services;
 
-import main.User;
-import main.FriendGraph;
+import main.*;
 //import java.io.*;
 import java.util.*;
-import main.DataTables;
+
 import dataStructures.BST;
 import dataStructures.LinkedList;
+import main.InterestManager;
 
 public class UserInterface {
     private Scanner scanner;
     private DataTables dataTables; // Integration of DataTables
     private FriendGraph friendGraph;
     private User loggedInUser;
+    private UserBST userBST;
+    private InterestManager interestManager;
 
     public UserInterface() {
         this.dataTables = new DataTables(30);
         this.friendGraph = new FriendGraph();
         this.scanner = new Scanner(System.in);
+        this.userBST = userBST;
+        this.interestManager = interestManager;
 
         mainMenu();
 
@@ -131,7 +135,7 @@ public class UserInterface {
                 recommendFriends();
                 break;
                 case 5:
-                viewInterest();
+                viewInterest(friendName); // Pass the friend's full name as a parameter and make a local variable
                 break; 
                 case 6:{
                     loggedInUser = null;
@@ -148,25 +152,41 @@ public class UserInterface {
         
     }
 
-    private void viewInterest() {
-        if (loggedInUser.getFriends().inOrderString().isEmpty()) {
-            System.out.println("You have no friends to view interests.");
+    /**
+     * Displays the interests of a friend's profile based on their full name.
+     *
+     * @param friendName The full name of the friend whose interests are to be viewed.
+     */
+    public void viewInterest(String friendName) {
+        ArrayList<User> matchingUsers = userBST.searchUsersByName(friendName);
+
+        if (matchingUsers.isEmpty()) {
+            System.out.println("No users found with the name: " + friendName);
             return;
         }
 
-        System.out.println("Your friends' interests:");
+        User friend = matchingUsers.get(0);
+        LinkedList<Interests> friendInterests = interestManager.getInterestsByUserID(friend.getId());
 
-        // Retrieve the list of friends
-
-
-        // Iterate through each friend and display their interests
-
-
-            // Iterate through the friend's interests using iterator methods
-
+        if (friendInterests.isEmpty()) {
+            System.out.println(friend.getFullName() + " has no interests listed.");
+        } else {
+            System.out.println(friend.getFullName() + "'s interests:");
+            friendInterests.positionIterator();
+            while (!friendInterests.offEnd()) {
+                try {
+                    Interests interest = friendInterests.getIterator();
+                    System.out.println(interest.getInterestName());
+                    friendInterests.advanceIterator();
+                } catch (NoSuchElementException e) {
+                    System.err.println("Error while iterating through interests: " + e.getMessage());
+                    break;
+                }
+            }
+        }
     }
-    
-    
+
+
     private void addFriend() {
         System.out.print("Enter username of friend: ");
         String username = scanner.nextLine();
