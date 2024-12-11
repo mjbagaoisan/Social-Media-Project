@@ -53,7 +53,7 @@ public class DataTables {
             return "invalid";
         }
     }
-    
+
     public void userHasInterest(String interest, User user){
         Interests y = new Interests(interest, user);
         ih.add(y);
