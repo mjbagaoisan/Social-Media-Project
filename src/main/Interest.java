@@ -1,9 +1,9 @@
 package main;
 
 import java.util.Objects;
-public class Interest implements Comparable<Interest> {
+public class Interest{// implements Comparable<Interest> {
   private String interestName;
-  private int interestId;
+  private int interestID;
 
   /**
    * Constructor for Interest

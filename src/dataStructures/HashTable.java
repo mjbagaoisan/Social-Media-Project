@@ -8,7 +8,8 @@ package dataStructures;
  */
 
 import java.util.ArrayList;
-import java.util.LinkedList;
+import dataStructures.LinkedList;
+
 
 public class HashTable<T> {
 

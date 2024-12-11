@@ -4,12 +4,12 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public class Interests implements Comparable<Interests> {
+public class Interests{
 
     private int interest;
-    private String user;
+    private User user;
 
-    public Interests(String interest, String user){
+    public Interests(String interest, User user){
         this.user = user;
         try{
             this.interest = Math.abs(strToInteger(interest));
@@ -18,12 +18,11 @@ public class Interests implements Comparable<Interests> {
         }
     }
     
-    
     @Override public int hashCode() {
 		return interest;
 	}
 
-    public String getUser(){
+    public User getUser(){
         return user;
     }
 
@@ -44,17 +43,5 @@ public class Interests implements Comparable<Interests> {
 			return this.interest == stu.interest && stu.user.equals(this.user);
 		}
 	}
-	
-	@Override public int compareTo(Interests stu) {
-		if(this.equals(stu)) {
-			return 0;
-		} else if (this.interest != stu.interest) {
-			return Integer.compare(this.interest, stu.interest);
-		} else {
-			return this.user.compareTo(stu.user);
-		}
-	}
-	
-
 	
 }

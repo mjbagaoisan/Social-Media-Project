@@ -1,7 +1,13 @@
 
 package main;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+
 import dataStructures.HashTable;
+import dataStructures.LinkedList;
 
 public class DataTables {
 
@@ -20,15 +26,18 @@ public class DataTables {
         return Math.abs(password.hashCode());
     }
 
-    public void register(String username, String password) {
+    public boolean register(String username, String password) {
         AuthHolder x = new AuthHolder(username, password);
         AH.add(x);
+        
+        return true;
     }
 
     // Authenticate a user
     public String authenticate(String username, String password) {
         AuthHolder res = AH.get(new AuthHolder(username, password));
-        if(AH.username.equals(username)){
+
+        if(res.getUsername().equals(username)){
             return "valid";
         }else{
             return "invalid";
@@ -37,26 +46,31 @@ public class DataTables {
     
 
     public void userHasInterest(String interest, User user){
-        Interest y = new Interest(interest, user);
+        Interests y = new Interests(interest, user);
         ih.add(y);
     }
 
     public ArrayList<User> getUsersWithInterest(String interest){
-
+        
+        int hashcode = 0;
         ArrayList<User> users = new ArrayList<>();
+        
         try{
-            interest = Math.abs(strToInteger(interest));
+            hashcode = Math.abs(strToInteger(interest));
         } catch (NoSuchAlgorithmException e) {
             System.err.println("Hashing algorithm not found: " + e.getMessage());
         }
 
-        int row = interest%ts;
-        LinkedList _ = ih.getRow(row);
-        _.positionIterator();
-        while (!_.offEnd()) {
-            Interests m = (Interests) _.getIterator(); // Access the data at the iterator
-            users.add(_.getUser());
-            _.advanceIterator(); // Move the iterator to the next node
+        int row = hashcode%ts;
+        
+        LinkedList rowContent = ih.getRow(row);
+        rowContent.positionIterator();
+
+        while (!rowContent.offEnd()) {
+            Interests m = (Interests) rowContent.getIterator(); // Access the data at the iterator
+            users.add(m.getUser());
+
+            rowContent.advanceIterator(); // Move the iterator to the next node
         }
 
         return users;
