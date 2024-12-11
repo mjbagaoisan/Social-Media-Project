@@ -6,7 +6,6 @@ import main.FriendGraph;
 import java.util.*;
 import main.DataTables;
 import dataStructures.BST;
-import dataStructures.LinkedList;
 
 public class UserInterface {
     private Scanner scanner;
@@ -88,7 +87,7 @@ public class UserInterface {
             if (interest.equals("done")) {
                 break;
             }
-            interests.addLast(interest);
+            interests.add(interest);
         }
 
         int id = generateUserId();
@@ -142,7 +141,7 @@ public class UserInterface {
         System.out.print("Enter username of friend: ");
         String username = scanner.nextLine();
         User friend = new User("First", "Last", username, "password", generateUserId(), "City", new LinkedList<>(), new BST<>());
-        friendGraph.addFriend(loggedInUser.getId(), friend.getId());
+        FriendGraph.addFriend(loggedInUser.getId(), friend.getId());
         
     }
 
