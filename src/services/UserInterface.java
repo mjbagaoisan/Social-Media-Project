@@ -75,6 +75,8 @@ public class UserInterface {
         } else {
             System.out.println("Invalid credentials.");
         }
+
+        userMenu();
     }
 
     private void createAccount() {
@@ -109,6 +111,8 @@ public class UserInterface {
         }
         System.out.println("Account created successfully!");
         loggedInUser = newUser;
+
+        userMenu();
     }
 
     private void userMenu() {
