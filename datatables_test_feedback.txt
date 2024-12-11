@@ -1,0 +1,9 @@
+Starting DataTables Tests...
+PASS: DataTables successfully instantiated.
+PASS: Registration for 'user1' with 'password1' succeeded.
+FAIL: Registration for duplicate username 'user1' should fail.
+FAIL: Authentication for 'user1' with 'password1' should return 'valid'.
+PASS: Authentication for 'user1' with 'wrongpassword' returned 'invalid'.
+PASS: Authentication for non-existent user returned 'invalid'.
+PASS: userHasInterest ran without exceptions (manual check for interest in HashTable).
+Total errors: 2
