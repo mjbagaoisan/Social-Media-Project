@@ -36,8 +36,7 @@ public class DataTables {
     // Authenticate a user
     public String authenticate(String username, String password) {
         AuthHolder res = AH.get(new AuthHolder(username, password));
-
-        if(res.getUsername().equals(username)){
+        if (res != null && res.getUsername().equals(username)){
             return "valid";
         }else{
             return "invalid";
@@ -59,6 +58,7 @@ public class DataTables {
             hashcode = Math.abs(strToInteger(interest));
         } catch (NoSuchAlgorithmException e) {
             System.err.println("Hashing algorithm not found: " + e.getMessage());
+            return users;
         }
 
         int row = hashcode%ts;
@@ -74,15 +74,13 @@ public class DataTables {
         }
 
         return users;
-
     }
-    
+
 
     public static int strToInteger(String password) throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] hashBytes = digest.digest(password.getBytes());
         BigInteger hashInt = new BigInteger(1, hashBytes);
-        return hashInt.intValue(); 
+        return hashInt.intValue();
     }
-
 }

@@ -263,7 +263,7 @@ public class FriendGraph {
      * @return The LinkedList of interests for the user.
      */
     private LinkedList<String> getInterests(int userId) {
-        return Interest.get(userId); // Assuming Interest.get() is a method to retrieve user interests
+        return Interests.get(userId); // Assuming Interest.get() is a method to retrieve user interests
     }
 
     /**

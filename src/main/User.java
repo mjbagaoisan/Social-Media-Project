@@ -118,4 +118,7 @@ public class User implements Serializable {
         return hashInt.intValue(); 
     }
 
+    public int compareTo(User user) {
+        return this.getFullName().compareTo(user.getFullName());
+    }
 }
