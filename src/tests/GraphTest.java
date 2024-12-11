@@ -92,10 +92,10 @@ public class GraphTest {
     int errors = 0;
         try {
             // Create User objects with the custom LinkedList
-            User u1 = new User("Alice", "Smith", "asmith", "password1", 0, null, new LinkedList<String>(), null);
-            User u2 = new User("Bob", "Jones", "bjones", "password2", 1, null, new LinkedList<String>(), null);
-            User u3 = new User("Charlie", "Brown", "cbrown", "password3", 2, null, new LinkedList<String>(), null);
-            User u4 = new User("Diana", "Prince", "dprince", "password4", 3, null, new LinkedList<String>(), null);
+            User u1 = new User("Alice", "Smith", "asmith", "password1", 1, null, new LinkedList<String>(), null);
+            User u2 = new User("Bob", "Jones", "bjones", "password2", 2, null, new LinkedList<String>(), null);
+            User u3 = new User("Charlie", "Brown", "cbrown", "password3", 3, null, new LinkedList<String>(), null);
+            User u4 = new User("Diana", "Prince", "dprince", "password4", 4, null, new LinkedList<String>(), null);
 
             // Add users to FriendGraph
             fg.addUser(u1);
@@ -114,12 +114,12 @@ public class GraphTest {
     private int testAddAndIsFriend(FriendGraph fg) {
         int errors = 0;
         try {
-            // Add a friend relation between Alice(0) and Bob(1)
-            fg.addFriend(0, 1);
-
-            boolean result = fg.isFriend(0, 1);
+            // Add a friend relation between Alice(1) and Bob(2)
+            fg.addFriend(1, 2);
+    
+            boolean result = fg.isFriend(1, 2);
             if (!result) {
-                msg("FAIL: After addFriend(0,1), isFriend(0,1) should return true.");
+                msg("FAIL: After addFriend(1,2), isFriend(1,2) should return true.");
                 errors++;
             } else {
                 msg("PASS: addFriend and isFriend work as expected.");
@@ -134,11 +134,11 @@ public class GraphTest {
     private int testRemoveFriend(FriendGraph fg) {
         int errors = 0;
         try {
-            // Currently Alice(0) and Bob(1) are friends
-            fg.removeFriend(0, 1);
-            boolean result = fg.isFriend(0, 1);
+            // Currently Alice(1) and Bob(2) are friends
+            fg.removeFriend(1, 2);
+            boolean result = fg.isFriend(1, 2);
             if (result) {
-                msg("FAIL: After removeFriend(0,1), isFriend(0,1) should return false.");
+                msg("FAIL: After removeFriend(1,2), isFriend(1,2) should return false.");
                 errors++;
             } else {
                 msg("PASS: removeFriend works as expected.");
@@ -154,11 +154,9 @@ public class GraphTest {
         int errors = 0;
         try {
             // Add friends again for testing getFriends
-            fg.addFriend(0, 1); // Alice & Bob
-            fg.addFriend(0, 2); // Alice & Charlie
-            // This should print Bob, Charlie to console.
-            // We can't easily check console output here, but we can ensure no exceptions are thrown.
-            fg.getFriends(0);
+            fg.addFriend(1, 2); // Alice & Bob
+            fg.addFriend(1, 3); // Alice & Charlie
+            fg.getFriends(1);
             msg("PASS: getFriends ran without exceptions (manual check console output).");
         } catch (Exception e) {
             msg("FAIL: Exception when testing getFriends: " + e.getMessage());
@@ -174,11 +172,11 @@ public class GraphTest {
             // Alice(0) is friends with Bob(1) and Charlie(2).
             // Make Bob(1) also friends with Charlie(2), so that
             // mutual friends between Alice(0) and Bob(1) would be Charlie(2).
-            fg.addFriend(1, 2);
+            fg.addFriend(2, 3);
 
             // This method prints mutual friends. We can’t easily verify printout without redirecting output.
             // We just ensure it doesn't throw an exception.
-            fg.getMutualFriends(0, 1);
+            fg.getMutualFriends(1, 2);
             msg("PASS: getMutualFriends ran without exceptions (check console for correctness).");
         } catch (Exception e) {
             msg("FAIL: Exception when testing getMutualFriends: " + e.getMessage());
