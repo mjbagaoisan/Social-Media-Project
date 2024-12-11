@@ -43,11 +43,21 @@ public class DataTables {
         }
     }
     
+    
+    public boolean removeUser(String username, String password){
+        AuthHolder tuser = new AuthHolder(username, password);
+        AH.delete(tuser);
+        return true;
+    }
 
     public void userHasInterest(String interest, User user){
         Interests y = new Interests(interest, user);
         ih.add(y);
     }
+
+    // public LinkedList<String> getInterests(User user){
+
+    // }
 
     public ArrayList<User> getUsersWithInterest(String interest){
         
@@ -75,7 +85,6 @@ public class DataTables {
 
         return users;
     }
-
 
     public static int strToInteger(String password) throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
