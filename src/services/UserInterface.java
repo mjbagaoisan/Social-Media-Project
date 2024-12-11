@@ -6,6 +6,7 @@ import main.FriendGraph;
 import java.util.*;
 import main.DataTables;
 import dataStructures.BST;
+import dataStructures.LinkedList;
 
 public class UserInterface {
     private Scanner scanner;
@@ -87,15 +88,18 @@ public class UserInterface {
             if (interest.equals("done")) {
                 break;
             }
-            interests.add(interest);
+            interests.addLast(interest);
         }
 
         int id = generateUserId();
         User newUser = new User(firstName, lastName, username, password, id, "City", interests, new BST<>());
         // Assuming register doesn't return anything, remove the success check.
         dataTables.register(username, password);
-        for(String interest : interests){
+        interests.positionIterator();
+        while (!interests.offEnd()) {
+            String interest = interests.getIterator();
             dataTables.userHasInterest(interest, newUser);
+            interests.advanceIterator();
         }
         System.out.println("Account created successfully!");
         loggedInUser = newUser;
@@ -145,7 +149,21 @@ public class UserInterface {
     }
 
     private void viewInterest() {
-       
+        if (loggedInUser.getFriends().inOrderString().isEmpty()) {
+            System.out.println("You have no friends to view interests.");
+            return;
+        }
+
+        System.out.println("Your friends' interests:");
+
+        // Retrieve the list of friends
+
+
+        // Iterate through each friend and display their interests
+
+
+            // Iterate through the friend's interests using iterator methods
+
     }
     
     
@@ -153,7 +171,7 @@ public class UserInterface {
         System.out.print("Enter username of friend: ");
         String username = scanner.nextLine();
         User friend = new User("First", "Last", username, "password", generateUserId(), "City", new LinkedList<>(), new BST<>());
-        FriendGraph.addFriend(loggedInUser.getId(), friend.getId());
+        friendGraph.addFriend(loggedInUser.getId(), friend.getId());
         System.out.println(friend.getFullName() + " added as a friend.");
         
     }
