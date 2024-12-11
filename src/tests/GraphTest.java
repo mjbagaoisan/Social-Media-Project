@@ -1,5 +1,7 @@
-package tests;
+package tests; 
 import main.FriendGraph;
+import main.User;
+
 import java.io.File;
 import java.io.PrintWriter;
 import java.nio.file.Files;
@@ -8,7 +10,8 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.lang.reflect.Field;
-
+import java.lang.reflect.Method;
+import dataStructures.LinkedList;
 
 public class GraphTest {
     private PrintWriter testFeedback;
@@ -86,35 +89,26 @@ public class GraphTest {
     }
 
     private int setupTestData(FriendGraph fg) {
-        int errors = 0;
+    int errors = 0;
         try {
-            // Access private fields for testing: 'names' and 'friendNetwork'
-            Field namesField = FriendGraph.class.getDeclaredField("names");
-            namesField.setAccessible(true);
-            @SuppressWarnings("unchecked")
-            ArrayList<String> names = (ArrayList<String>) namesField.get(fg);
+            // Create User objects with the custom LinkedList
+            User u1 = new User("Alice", "Smith", "asmith", "password1", 0, null, new LinkedList<String>(), null);
+            User u2 = new User("Bob", "Jones", "bjones", "password2", 1, null, new LinkedList<String>(), null);
+            User u3 = new User("Charlie", "Brown", "cbrown", "password3", 2, null, new LinkedList<String>(), null);
+            User u4 = new User("Diana", "Prince", "dprince", "password4", 3, null, new LinkedList<String>(), null);
 
-            // Add some dummy names
-            names.add("Alice");
-            names.add("Bob");
-            names.add("Charlie");
-            names.add("Diana");
+            // Add users to FriendGraph
+            fg.addUser(u1);
+            fg.addUser(u2);
+            fg.addUser(u3);
+            fg.addUser(u4);
 
-            // Access friendNetwork field (Graph)
-            Field graphField = FriendGraph.class.getDeclaredField("friendNetwork");
-            graphField.setAccessible(true);
-            Object graphObj = graphField.get(fg);
-
-            // We assume graph is something like 'new Graph(0)', we might need to reinit:
-            // If the Graph class allows setting the number of vertices, we might need reflection here too.
-            // For now, assume Graph supports dynamic addition via addUndirectedEdge or a known method.
-            // Without the Graph code, we'll just hope addUndirectedEdge works after resizing internally.
-            msg("PASS: Test data (names) set up successfully.");
+            msg("PASS: Added 4 users to FriendGraph.");
         } catch (Exception e) {
             msg("FAIL: Unable to set up test data due to: " + e.getMessage());
             errors++;
         }
-        return errors;
+    return errors;
     }
 
     private int testAddAndIsFriend(FriendGraph fg) {
