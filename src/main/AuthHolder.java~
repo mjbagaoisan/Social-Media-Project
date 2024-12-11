@@ -47,22 +47,6 @@ public class AuthHolder implements Comparable<AuthHolder> {
         }
 
     /**
-     * Verifies if the provided password matches the stored password hash.
-     *
-     * @param password The plain text password to verify.
-     * @return True if the password is correct, false otherwise.
-     */
-    public boolean verifyPassword(String password) {
-        try {
-            String hashedInput = hashPassword(password);
-            return this.passwordHash.equals(hashedInput);
-        } catch (NoSuchAlgorithmException e) {
-            System.err.println("Hashing algorithm not found: " + e.getMessage());
-            return false;
-        }
-    }
-
-    /**
      * Returns the username.
      *
      * @return The username.

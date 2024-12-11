@@ -83,11 +83,7 @@ public class User implements Serializable {
         return interests;
     }
 
-    // Setters
 
-    public void setFriends(BST<User> friends) {
-        this.friends = friends;
-    }
 
 
     public static int passwordToInteger(String password) throws NoSuchAlgorithmException {
