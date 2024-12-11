@@ -41,17 +41,19 @@ public class Interests {
         BigInteger hashInt = new BigInteger(1, hashBytes);
         return hashInt.intValue(); 
     }
-    
-    @Override public boolean equals(Object obj) {
-		if(this == obj) {
-			return true;
-		} else if (!(obj instanceof Interests other)) {
-			return false;
-		} else {
-            return this.interest == other.interest && this.user.equals(other.user);
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        } else if (!(obj instanceof Interests)) {
+            return false;
+        } else {
+            Interests stu = (Interests) obj;
+            return this.interest == stu.interest && this.user.equals(stu.user) && this.interestName.equals(stu.interestName);
         }
-	}
+    }
+
     @Override
     public String toString() {
         return interestName;
