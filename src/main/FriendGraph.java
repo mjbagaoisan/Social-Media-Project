@@ -162,54 +162,6 @@ public class FriendGraph {
 
 
 
-    public void getMutualFriends(int user1, int user2) {
-        int vertex1 = user1 + 1;
-        int vertex2 = user2 + 1;
-        if (friendNetwork == null) {
-            System.err.println("Graph not initialized.");
-            return;
-        }
-
-        if (!userIds.contains(user1) || !userIds.contains(user2)) {
-            System.err.println("One or both User IDs provided do not exist.");
-            return;
-        }
-
-        ArrayList<Integer> mutualFriends = new ArrayList<>();
-
-        try {
-            LinkedList<Integer> friendsUser1 = friendNetwork.getAdjacencyList(vertex1);
-            LinkedList<Integer> friendsUser2 = friendNetwork.getAdjacencyList(vertex2);
-
-            ArrayList<Integer> user1Friends = new ArrayList<>();
-            friendsUser1.positionIterator();
-            while (!friendsUser1.offEnd()) {
-                user1Friends.add(friendsUser1.getIterator());
-                friendsUser1.advanceIterator();
-            }
-
-            friendsUser2.positionIterator();
-            while (!friendsUser2.offEnd()) {
-                int friendVertexId = friendsUser2.getIterator();
-                if (user1Friends.contains(friendVertexId)) {
-                    mutualFriends.add(friendVertexId);
-                }
-                friendsUser2.advanceIterator();
-            }
-
-            if (!mutualFriends.isEmpty()) {
-                System.out.println("Mutual friends between " + getUserNameById(user1) + " and " + getUserNameById(user2) + ":");
-                for (Integer friendVertexId : mutualFriends) {
-                    int friendUserId = friendVertexId - 1;
-                    System.out.println("- " + getUserNameById(friendUserId) + " (ID: " + friendUserId + ")");
-                }
-            } else {
-                System.out.println("No mutual friends found.");
-            }
-        } catch (IndexOutOfBoundsException | NoSuchElementException e) {
-            System.err.println("Error finding mutual friends: " + e.getMessage());
-        }
-    }
 
     public boolean isFriend(int user1, int user2) {
         int vertex1 = user1 + 1;

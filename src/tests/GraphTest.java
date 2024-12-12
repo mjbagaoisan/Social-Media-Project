@@ -63,8 +63,6 @@ public class GraphTest {
         // Test 4: getFriends
         errorCount += testGetFriends(fg);
 
-        // Test 5: getMutualFriends
-        errorCount += testGetMutualFriends(fg);
 
         // Test 6: getReccomendedFriends (typo in given code - assuming it's intended)
         errorCount += testGetRecommendedFriends(fg);
@@ -165,25 +163,7 @@ public class GraphTest {
         return errors;
     }
 
-    private int testGetMutualFriends(FriendGraph fg) {
-        int errors = 0;
-        try {
-            // Setup:
-            // Alice(0) is friends with Bob(1) and Charlie(2).
-            // Make Bob(1) also friends with Charlie(2), so that
-            // mutual friends between Alice(0) and Bob(1) would be Charlie(2).
-            fg.addFriend(2, 3);
 
-            // This method prints mutual friends. We can’t easily verify printout without redirecting output.
-            // We just ensure it doesn't throw an exception.
-            fg.getMutualFriends(1, 2);
-            msg("PASS: getMutualFriends ran without exceptions (check console for correctness).");
-        } catch (Exception e) {
-            msg("FAIL: Exception when testing getMutualFriends: " + e.getMessage());
-            errors++;
-        }
-        return errors;
-    }
 
     private int testGetRecommendedFriends(FriendGraph fg) {
         int errors = 0;

@@ -17,8 +17,9 @@ public class DataTables {
         if (AH == null) {  // Only initialize if not already initialized
             AH = new HashTable<>(tableSize);
         }
-        this.interestManager = new InterestManager(tableSize);
+        this.interestManager = interestManager;  // Use the passed InterestManager
     }
+
 
     public boolean register(String username, String password) {
         System.out.println("DEBUG: Attempting to register: " + username);
@@ -80,7 +81,6 @@ public class DataTables {
 
 
     public void userHasInterest(String interestName, User user) {
-        // Create new Interest object
         // Add to InterestManager
         interestManager.addInterest(interestName, user);
 

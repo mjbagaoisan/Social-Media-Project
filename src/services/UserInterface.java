@@ -122,7 +122,7 @@ public class UserInterface {
             }
         }
 
-        User newUser = new User(firstName, lastName, username, password, id, "City", interests, new BST<>());
+        User newUser = new User(firstName, lastName, username, password, generatedID, city interests, new BST<>());
         System.out.println("DEBUG: Created new user object: " + newUser.toString());
 
         userBST.insertUser(newUser);
@@ -359,6 +359,7 @@ public class UserInterface {
             System.out.println("Invalid user.");
             return;
         }
+        System.out.println("DEBUG: Fetching interests for user ID: " + friend.getFullName());
         System.out.println("Interests:");
         LinkedList<String> interests = interestManager.getInterestNamesForDisplay(friend.getId());  // Get interests
 
@@ -473,6 +474,11 @@ public class UserInterface {
 
     private void addFriend(User friend) {
         friendGraph.addFriend(loggedInUser.getId(), friend.getId());
+
+        Comparator<User> userComparator = (u1, u2) -> Integer.compare(u1.getId(), u2.getId());
+        loggedInUser.getFriends().insert(friend, userComparator);
+
+        friend.getFriends().insert(loggedInUser, userComparator);
         System.out.println(friend.getFullName() + " added as a friend.");
     }
 
