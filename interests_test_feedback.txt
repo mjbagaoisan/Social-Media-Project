@@ -1,6 +1,0 @@
-Starting Interests Tests...
-PASS: Hash code for interest 'Reading' matched expected value.
-FAIL: Interests with the same user and interest name should be equal.
-PASS: Interests with different interest names are not equal.
-FAIL: searchUsersByInterest('Reading') should return Alice Smith.
-Total errors: 2

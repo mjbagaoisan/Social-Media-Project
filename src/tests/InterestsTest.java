@@ -117,7 +117,11 @@ public class InterestsTest {
 
             Interests interest = new Interests("Reading", alice);
             // Manually set the users list for testing
-            interest.searchUsersByInterest("Reading");
+
+            User user1 = new User("Alice", "Smith", "asmith", "password1", 1, "New York", new LinkedList<>(), null);
+
+            interest = new Interests("Reading", user1);
+            interest.users.addLast(user1);
 
             LinkedList<User> result = interest.searchUsersByInterest("Reading");
 
