@@ -1,102 +1,102 @@
-588
+3
 Anthony Davis
 anthony_davis
 0
 0
 City
 0
-589
+1
 Devin Booker
 devin_booker
 0
 0
 City
 0
-590
+45
 Donovan Mitchell
 donovan_mitchell
 0
 0
 City
 0
-591
+34
 Giannis Antetokounmpo
 giannis_antetokounmpo
 0
 0
 City
 0
-592
+13
 James Harden
 james_harden
 0
 0
 City
 0
-593
+0
 Jayson Tatum
 jayson_tatum
 0
 0
 City
 0
-594
+22
 Jimmy Butler
 jimmy_butler
 0
 0
 City
 0
-595
+21
 Joel Embiid
 joel_embiid
 0
 0
 City
 0
-596
+2
 Kawhi Leonard
 kawhi_leonard
 0
 0
 City
 0
-597
+7
 Kevin Durant
 kevin_durant
 0
 0
 City
 0
-598
+23
 LeBron James
 GoatJames
 0
 0
 City
 0
-599
+77
 Luka Doncic
 luka_doncic
 0
 0
 City
 0
-600
+15
 Nikola Jokic
 nikola_jokic
 0
 0
 City
 0
-601
+30
 Stephen Curry
 IAmStephenCurry
 0
 0
 City
 0
-602
+1
 Zion Williamson
 zion_williamson
 0

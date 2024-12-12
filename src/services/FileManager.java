@@ -2,6 +2,8 @@ package services;
 
 import java.io.*;
 import java.util.*;
+
+import main.FriendGraph;
 import main.User;
 import main.UserBST;
 import dataStructures.BST;
@@ -14,20 +16,21 @@ public class FileManager {
         int userId;
         List<Integer> friendIds;
         DataTables dataTables;
+        FriendGraph friendGraph;
 
 
         FriendshipData(int userId) {
             this.userId = userId;
             this.friendIds = new ArrayList<>();
             this.dataTables = new DataTables(100);
+            this.friendGraph = new FriendGraph();
 
         }
     }
 
-    public static void loadData(UserBST userBST, DataTables dataTables) {
+    public static void loadData(UserBST userBST, DataTables dataTables, FriendGraph friendGraph) {
         File file = new File("data.txt");
         List<FriendshipData> friendships = new ArrayList<>();
-
 
         try (Scanner scanner = new Scanner(file)) {
             while (scanner.hasNextLine()) {
@@ -86,7 +89,6 @@ public class FileManager {
                     userBST.insertUser(user);
                     dataTables.register(username, password);
 
-
                     // Register interests
                     interests.positionIterator();
                     while (!interests.offEnd()) {
@@ -114,6 +116,37 @@ public class FileManager {
                             System.out.println("Added friend " + friendList.get(0).getFullName() + " to " + user.getFullName());
                         }
                     }
+                }
+            }
+
+            // Now that all users and their friendships are in userBST,
+            // add them to the friendGraph
+            ArrayList<User> allUsers = userBST.getUsers();
+            for (User user : allUsers) {
+                friendGraph.addUser(user);
+            }
+
+            // Add edges (friendships) to the friendGraph
+            for (User user : allUsers) {
+                BST<User> friendsBST = user.getFriends();
+                // We need to get each friend from friendsBST. Assuming you have a method to get the BST contents:
+                // If not, you can parse friendsBST.inOrderString(), or if BST has a method inOrderTraversal() that returns an ArrayList:
+
+                // Example using inOrderString (if no direct method is available):
+                String friendsInOrder = friendsBST.inOrderString();
+                // Each line in friendsInOrder represents a User in format: User[ID=X, Username=..., FullName=...]
+                // We'll parse the ID:
+                String[] lines = friendsInOrder.split("\n");
+                for (String l : lines) {
+                    if (l.trim().isEmpty()) continue;
+                    // Extract ID from the string:
+                    // Format assumed: User[ID=X, Username=..., FullName=...]
+                    int start = l.indexOf("ID=") + 3;
+                    int end = l.indexOf(",", start);
+                    String idStr = l.substring(start, end).trim();
+                    int friendId = Integer.parseInt(idStr);
+
+                    friendGraph.addFriend(user.getId(), friendId);
                 }
             }
 

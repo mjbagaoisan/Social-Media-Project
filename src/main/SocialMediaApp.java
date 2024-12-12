@@ -3,22 +3,34 @@ package main;
 import services.FileManager;
 import services.UserInterface;
 
-public class SocialMediaApp {
+import java.util.ArrayList;
 
+
+public class SocialMediaApp {
     private UserInterface userInterface;
     private FileManager fileManager;
     private UserBST userBST;
     private DataTables dataTables;
+    private FriendGraph friendGraph;
+    private InterestManager interestManager;
 
     public SocialMediaApp() {
-        this.userInterface = new UserInterface();
-        this.fileManager = new FileManager();
         this.userBST = new UserBST();
-        this.dataTables = new DataTables(30);
+        this.dataTables = new DataTables(100);
+        this.friendGraph = new FriendGraph();
+        this.interestManager = new InterestManager(30);
+        this.fileManager = new FileManager();
     }
 
     public void loadUsers() {
-        FileManager.loadData(userBST, dataTables);
+        FileManager.loadData(userBST, dataTables, friendGraph);
+        System.out.println("DEBUG: After loading data, checking user friends:");
+        ArrayList<User> allUsers = userBST.getUsers();
+        for (User u : allUsers) {
+            String friendsStr = u.getFriends().inOrderString();
+            System.out.println(u.getFullName() + " friends in BST: " + friendsStr);
+        }
+
     }
 
     public void saveUsers() {
@@ -27,13 +39,15 @@ public class SocialMediaApp {
 
     public void start() {
         loadUsers();
-        userInterface.startUI();  // Launch user interface
-        saveUsers();  // Save data when exiting
+        // Now create UserInterface with the loaded data
+        userInterface = new UserInterface(userBST, dataTables, friendGraph, interestManager);
+        userInterface.startUI();
+        saveUsers();
     }
 
     public static void main(String[] args) {
-        SocialMediaApp app = new SocialMediaApp();
         System.out.println("Welcome to the Social Media App!");
-        app.start();  // Start the app
+        SocialMediaApp app = new SocialMediaApp();
+        app.start();
     }
 }

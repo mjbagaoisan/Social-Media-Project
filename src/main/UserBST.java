@@ -9,6 +9,7 @@ public class UserBST {
     private BST<User> userNameBST;
     private Comparator<User> nameComparator = (u1, u2) ->
             u1.getFullName().compareToIgnoreCase(u2.getFullName());
+    private ArrayList<User> userReferences = new ArrayList<>();
 
     public UserBST() {
         userNameBST = new BST<>();
@@ -22,50 +23,13 @@ public class UserBST {
             return;
         }
         userNameBST.insert(user, nameComparator);
-        System.out.println("DEBUG: User inserted. Current BST inorder traversal: " + userNameBST.inOrderString());
+        userReferences.add(user); // Keep the actual reference here
+        System.out.println("DEBUG: User inserted...");
     }
 
     public ArrayList<User> getUsers() {
-        ArrayList<User> users = new ArrayList<>();
-
-        if (userNameBST.isEmpty()) {
-            return users;
-        }
-
-        // Get the inorder string representation
-        String inOrderStr = userNameBST.inOrderString();
-        String[] lines = inOrderStr.split("\n");
-
-        for (String line : lines) {
-            if (line != null && !line.trim().isEmpty()) {
-                try {
-                    // Parse the User details from the toString() format
-                    // Assuming format: User[ID=x, Username=y, FullName=z]
-                    String[] parts = line.substring(line.indexOf("[") + 1, line.indexOf("]")).split(", ");
-                    int id = Integer.parseInt(parts[0].split("=")[1]);
-                    String username = parts[1].split("=")[1];
-                    String fullName = parts[2].split("=")[1];
-                    String[] names = fullName.split(" ");
-
-                    if (names.length >= 2) {
-                        User user = new User(
-                                names[0],           // firstName
-                                names[1],           // lastName
-                                username,           // username
-                                "",                // password (empty since it's hashed)
-                                id,                // id
-                                "City",            // city
-                                new LinkedList<>(), // interests
-                                new BST<>()        // friends
-                        );
-                        users.add(user);
-                    }
-                } catch (Exception e) {
-                    System.err.println("Error parsing user string: " + line);
-                }
-            }
-        }
-        return users;
+        // Return a copy of the list to avoid accidental modifications outside this class
+        return new ArrayList<>(userReferences);
     }
 
     public ArrayList<User> searchUsersByName(String name) {

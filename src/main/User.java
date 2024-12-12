@@ -4,6 +4,9 @@ import dataStructures.BST;
 
 import java.io.Serializable;
 import dataStructures.LinkedList;
+import services.FileManager;
+import services.UserInterface;
+
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -22,16 +25,18 @@ public class User implements Serializable {
     private final int id;
     private static int idCounter = 0;
     private final LinkedList<String> interests;
-    private static int nextId = 1;
+    private String password;
+
+
 
     public User(String firstName, String lastName, String username, String password, int id, String city, LinkedList<String> interests, BST<User> friends) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.username = username;
         this.passwordHash = hashPassword(password);
-        this.friends = new BST<>();
+        this.friends = friends;
         this.city = city;
-        this.id = nextId++;  // Use the static counter instead of the passed id
+        this.id = id;
         this.interests = interests;
 
         try {
@@ -64,10 +69,10 @@ public class User implements Serializable {
         return id;
     }
 
-    //for hashtables
-    @Override public int hashCode() {
-		return passwordHashID;
-	}
+    @Override
+    public int hashCode() {
+        return password == null ? 0 : password.hashCode();
+    }
 	
 
     public String getCity() {
@@ -104,10 +109,10 @@ public class User implements Serializable {
         if (!(obj instanceof User))
             return false;
         User other = (User) obj;
-        return this.id == other.id && Objects.equals(this.firstName, other.firstName)
-                && Objects.equals(this.lastName, other.lastName) && Objects.equals(this.username, other.username)
-                && Objects.equals(this.passwordHash, other.passwordHash) && Objects.equals(this.city, other.city);
+        // Now only compare based on passwordHash, for instance
+        return Objects.equals(this.passwordHash, other.passwordHash);
     }
+
 
     @Override
     public String toString() {
