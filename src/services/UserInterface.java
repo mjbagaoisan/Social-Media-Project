@@ -2,54 +2,58 @@ package services;
 
 import main.*;
 import java.util.*;
-
 import dataStructures.BST;
 import dataStructures.LinkedList;
+import main.InterestManager;
+import services.FileManager;
 
 public class UserInterface {
     private Scanner scanner;
-    private DataTables dataTables; // Integration of DataTables
+    private DataTables dataTables;
     private FriendGraph friendGraph;
-    private User loggedInUser;
     private UserBST userBST;
     private InterestManager interestManager;
-    //private FileManager fileManager;
+    private User loggedInUser;
+    private static int nextUserId = 100;
 
-    public UserInterface() {
-        this.dataTables = new DataTables(30);
-        this.friendGraph = new FriendGraph();
+    public UserInterface(UserBST userBST, DataTables dataTables, FriendGraph friendGraph, InterestManager interestManager) {
         this.scanner = new Scanner(System.in);
+        this.userBST = userBST;
+        this.dataTables = dataTables;
+        this.friendGraph = friendGraph;
+        this.interestManager = interestManager;
+
+        ArrayList<User> users = userBST.getUsers();
+        dataTables.loadAuthData(users);
     }
 
     public void startUI() {
         mainMenu();
     }
-    
 
     private void mainMenu() {
         while (true) {
-            System.out.print("Choose an option: ");
             System.out.println("1. Login");
             System.out.println("2. Create Account");
-            System.out.println("3. Logout and Save Data");
+            System.out.println("3. Exit and Save Data");
+            System.out.print("Choose an option: ");
             int choice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
+            scanner.nextLine(); // consume newline
 
             switch (choice) {
-                case 1: 
+                case 1:
                     login();
                     break;
-                case 2: 
+                case 2:
                     createAccount();
                     break;
-                case 3: {
-                    FileManager.saveData(userBST, dataTables);
-                    loggedInUser = null;
-                    System.out.println("Goodbye!");
+                case 3:
+                    System.out.println("Saving data and exiting.... Goodbye!");
+                    FileManager.saveData(userBST, dataTables, friendGraph, interestManager);
                     return;
-                }
-                default: 
+                default:
                     System.out.println("Invalid choice.");
+                    break; // Add break here
             }
         }
     }
@@ -60,29 +64,28 @@ public class UserInterface {
         System.out.println("Password: ");
         String password = scanner.nextLine();
 
-        //Authenticate user using the DataTables class
-        String authenticatedUser = dataTables.authenticate(username,password);
-        if (!authenticatedUser.equals("invalid")) {
-            loggedInUser = new User("First", "Last", username, password, loggedInUser.getId(), "City", new LinkedList<>(), new BST<>());
-            if (loggedInUser != null) {
-                System.out.println("Login successful! Welcome, " + loggedInUser.getFullName());
-                userMenu();
-            }else{
-                System.out.println("User data not found. Please contact support.");
+        ArrayList<User> users = userBST.getUsers();
+        User matchingUser = null;
+        for (User user : users) {
+            if (user.getUsername().equals(username)) {
+                matchingUser = user;
+                break;
             }
+        }
+
+        if (matchingUser == null) {
+            System.out.println("User not found.");
+            return;
+        }
+
+        String authenticatedUser = dataTables.authenticate(username, password);
+        if (authenticatedUser.equals("valid")) {
+            loggedInUser = matchingUser;
+            System.out.println("Login successful! Welcome, " + loggedInUser.getFullName());
+            userMenu();
         } else {
             System.out.println("Invalid credentials.");
         }
-    }
-
-    private boolean isUsernameTaken(String username) {
-        // Use a loop or a method to check if the username already exists
-        for (User user : userBST.getUsers()) {
-            if (user.getUsername().equals(username)) {
-                return true; // Username is already taken
-            }
-        }
-        return false; // Username is available
     }
 
     private void createAccount() {
@@ -92,45 +95,74 @@ public class UserInterface {
         String lastName = scanner.nextLine();
         System.out.print("Username: ");
         String username = scanner.nextLine();
-        if (isUsernameTaken(username)) {
-            System.out.println("Username is already taken. Please choose a different username.");
-            return;
+        while (username.isEmpty()) {
+            System.out.println("Error: Username cannot be blank.");
+            System.out.print("Username: ");
+            username = scanner.nextLine().trim();
         }
         System.out.print("Password: ");
         String password = scanner.nextLine();
-        
+        while (password.isEmpty()) {
+            System.out.println("Error: Password cannot be blank.");
+            System.out.print("Password: ");
+            password = scanner.nextLine().trim();
+        }
+
+
+        if (!dataTables.register(username, password)) {
+            System.out.println("Username already exists. Please choose another.");
+            return;
+        }
+
+        System.out.print("City: ");
+        String city = scanner.nextLine();
+
+
         LinkedList<String> interests = new LinkedList<>();
         System.out.println("Enter interests (type 'done' to finish): ");
         while (true) {
-            String interest = scanner.nextLine();
-            if (interest.equals("done")) {
+            String interest = scanner.nextLine().trim();
+            if (interest.equalsIgnoreCase("done")) {
                 break;
             }
-            interests.addLast(interest);
+            if (!interest.isEmpty()) {
+                interests.addLast(interest);
+            }
         }
 
-        int id = generateUserId();
-        User newUser = new User(firstName, lastName, username, password, id, "City", interests, new BST<>());
-        // Assuming register doesn't return anything, remove the success check.
-        dataTables.register(username, password);
+        int generatedId = nextUserId++;
+
+        User newUser = new User(firstName, lastName, username, password, generatedId, city, interests, new BST<>());
+
+        userBST.insertUser(newUser);
+
         interests.positionIterator();
         while (!interests.offEnd()) {
             String interest = interests.getIterator();
-            dataTables.userHasInterest(interest, newUser);
+            interestManager.addInterest(interest, newUser);
             interests.advanceIterator();
         }
+
+        friendGraph.addUser(newUser);
+
+
         System.out.println("Account created successfully!");
         loggedInUser = newUser;
+
+
+        FileManager.saveData(userBST, dataTables, friendGraph, interestManager);
+
+        userMenu();
     }
 
     private void userMenu() {
         while (true) {
             System.out.println("1. View Friends");
             System.out.println("2. Make New Friends");
-            System.out.println("3. Main Menu");
+            System.out.println("3. Logout");
             System.out.print("Choose an option: ");
             int choice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
+            scanner.nextLine(); // consume newline
 
             switch (choice) {
                 case 1:
@@ -139,39 +171,39 @@ public class UserInterface {
                 case 2:
                     makeNewFriend();
                     break;
-                case 3:{
-                    mainMenu();
-                    break;
-                }
-                default: 
+                case 3:
+                    System.out.println("Logging out!... Logged out.");
+                    FileManager.saveData(userBST, dataTables, friendGraph, interestManager);
+                    loggedInUser = null;
+                    return;
+                default:
                     System.out.println("Invalid choice.");
-                    break;
+                    break; // Add break
             }
         }
     }
 
     private void viewFriends() {
-
         while (true) {
             System.out.println("1. View Friends (Sorted by Name)");
             System.out.println("2. Search for a Friend");
             System.out.println("3. Go Back");
             System.out.print("Choose an option: ");
             int choice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
+            scanner.nextLine(); // consume newline
 
             switch (choice) {
                 case 1:
                     viewFriendsByName();
                     break;
                 case 2:
-                    searchForFriend();
+                    searchForFriend(scanner);
                     break;
                 case 3:
-                    userMenu();
-                    break;
+                    return; // Go back to userMenu
                 default:
                     System.out.println("Invalid choice.");
+                    break; // Add break
             }
         }
     }
@@ -184,11 +216,11 @@ public class UserInterface {
             System.out.println("4. Go Back");
             System.out.print("Choose an option: ");
             int choice = scanner.nextInt();
-            scanner.nextLine();
+            scanner.nextLine(); // consume newline
 
             switch (choice) {
                 case 1:
-                    searchByName();
+                    searchByName(scanner);
                     break;
                 case 2:
                     searchByInterest();
@@ -197,167 +229,238 @@ public class UserInterface {
                     recommendFriends();
                     break;
                 case 4:
-                    userMenu();
-                    break;
+                    return; // Go back to userMenu
                 default:
                     System.out.println("Invalid choice.");
+                    break; // Add break
             }
         }
     }
 
-    public void viewFriendsByName() {
+    private void viewFriendsByName() {
         System.out.println("Your friends (sorted by name):");
-        friendGraph.getFriends(loggedInUser.getId());
-    }
+        System.out.println(loggedInUser.getFullName() + "'s Friends:\n");
 
-    public void searchForFriend() {
-        System.out.println("Enter name of friend to search for: ");
-        String fullName = scanner.nextLine().trim();
-
-        if (fullName.isEmpty()) {
-            System.out.println("Name cannot be empty.");
+        BST<User> friendsBST = loggedInUser.getFriends();
+        if (friendsBST == null || friendsBST.isEmpty()) {
+            System.out.println("No friends found.");
             return;
         }
-        ArrayList<User> matchingUsers = userBST.searchUsersByName(fullName);
 
-        if (matchingUsers.isEmpty()) {
-            System.out.println("No friends found with the name: " + fullName);
-        } else {
-            System.out.println("Friend found with the name: " + fullName);
-            for (User user : matchingUsers) {
-                System.out.println(user.getFullName());
+        // Print header
+        System.out.println("Full Name                Username         ID");
+        System.out.println("------------------------------------------------");
+
+        // Use LinkedList to track displayed friends
+        LinkedList<String> displayedFriends = new LinkedList<>();
+        String[] friendsList = friendsBST.inOrderString().split("\n");
+
+        for (String friendStr : friendsList) {
+            if (!friendStr.trim().isEmpty()) {
+                // Check if we've already displayed this friend
+                if (!displayedFriends.contains(friendStr)) {
+                    // Parse the friend string
+                    // Format: User[ID=X, Username=Y, FullName=Z]
+                    int idStart = friendStr.indexOf("ID=") + 3;
+                    int idEnd = friendStr.indexOf(",", idStart);
+                    int usernameStart = friendStr.indexOf("Username=") + 9;
+                    int usernameEnd = friendStr.indexOf(",", usernameStart);
+                    int nameStart = friendStr.indexOf("FullName=") + 9;
+                    int nameEnd = friendStr.indexOf("]");
+
+                    String id = friendStr.substring(idStart, idEnd);
+                    String username = friendStr.substring(usernameStart, usernameEnd);
+                    String fullName = friendStr.substring(nameStart, nameEnd);
+
+                    // Format and print with proper spacing
+                    String formattedName = String.format("%-23s", fullName);
+                    String formattedUsername = String.format("%-19s", username);
+                    String formattedId = String.format("%-5s", id);
+
+                    System.out.println(formattedName + formattedUsername + formattedId);
+                    displayedFriends.addLast(friendStr);
+                }
+            }
+        }
+        System.out.println("------------------------------------------------");
+    }
+
+
+    public void searchForFriend(Scanner input) {
+        System.out.println("Enter name of friend to search for: ");
+        String searchName = input.nextLine();
+
+        // Create a list to store matching users
+        ArrayList<User> matchingUsers = new ArrayList<>();
+
+        // Search through all users
+        ArrayList<User> allUsers = userBST.getUsers();
+        for (User user : allUsers) {
+            if (user.getFullName().toLowerCase().contains(searchName.toLowerCase())) {
+                matchingUsers.add(user);
             }
         }
 
+        if (matchingUsers.isEmpty()) {
+            System.out.println("No users found with that name.");
+            return;
+        }
 
-        while (true) {
+        // Display header
+        System.out.println("\nFound " + matchingUsers.size() + " users with the name '" + searchName + "':");
+        System.out.println("Full Name                Username            ID");
+        System.out.println("------------------------------------------------");
+
+        // Display matching users
+        for (User user : matchingUsers) {
+            String formattedName = String.format("%-23s", user.getFullName());
+            String formattedUsername = String.format("%-19s", user.getUsername());
+            String formattedId = String.format("%-5d", user.getId());
+            System.out.println(formattedName + formattedUsername + formattedId);
+        }
+        System.out.println("------------------------------------------------");
+
+        // Select user
+        System.out.println("\nSelect user by number (or 0 to go back): ");
+        try {
+            int selection = Integer.parseInt(input.nextLine());
+
+            if (selection == 0) {
+                return;
+            }
+
+            if (selection < 1 || selection > matchingUsers.size()) {
+                System.out.println("Invalid selection.");
+                return;
+            }
+
+            User selectedUser = matchingUsers.get(selection - 1);
+
+            System.out.println("\nSelected: " + selectedUser.getFullName());
             System.out.println("1. View Profile");
             System.out.println("2. Remove Friend");
             System.out.println("3. Go Back");
-            System.out.print("Choose an option: ");
-            int choice = scanner.nextInt();
-            scanner.nextLine();
+
+            int choice = Integer.parseInt(input.nextLine());
 
             switch (choice) {
                 case 1:
-                    viewFriendProfile(matchingUsers.get(0));
+                    viewFriendProfile(selectedUser);
                     break;
                 case 2:
-                    removeFriend(matchingUsers.get(0));
+                    removeFriend(selectedUser);
                     break;
                 case 3:
-                    viewFriends();
-                    break;
+                    return;
                 default:
-                    System.out.println("Invalid choice.");
-            }
-        }
-    }
-
-    /**
-     * Allows the user to search for a person by name, view their profile, or add them as a friend.
-     * If the person is already a friend, the user is prompted to search again.
-     */
-    public void searchByName() {
-        while (true) {
-            System.out.println("Enter name of person to search for: ");
-            String fullName = scanner.nextLine().trim();
-
-            if (fullName.isEmpty()) {
-                System.out.println("Name cannot be empty.");
-                continue;
+                    System.out.println("Invalid option.");
             }
 
-            ArrayList<User> matchingUsers = userBST.searchUsersByName(fullName);
-
-            if (matchingUsers.isEmpty()) {
-                System.out.println("No users found with the name: " + fullName);
-                continue;
-            } else {
-                System.out.println("User(s) found with the name: " + fullName);
-                for (User user : matchingUsers) {
-                    System.out.println(user.getFullName());
-                }
-            }
-
-            User selectedUser = matchingUsers.get(0);
-            int selectedUserId = selectedUser.getId();
-            boolean isFriend = friendGraph.isFriend(loggedInUser.getId(), selectedUserId);
-
-            if (isFriend) {
-                System.out.println(selectedUser.getFullName() + " is already added as a friend.");
-                System.out.println("Please search for another user.");
-                continue;
-            }
-
-            while (true) {
-                System.out.println("1. View Profile");
-                System.out.println("2. Add Friend");
-                System.out.println("3. Go Back");
-                System.out.print("Choose an option: ");
-                int choice = scanner.nextInt();
-                scanner.nextLine();
-
-                switch (choice) {
-                    case 1:
-                        viewFriendProfile(selectedUser);
-                        break;
-                    case 2:
-                        addFriend(selectedUser);
-                        break;
-                    case 3:
-                        makeNewFriend();
-                        break;
-                    
-                    default:
-                        System.out.println("Invalid choice. Please try again.");
-                }
-
-                break;
-            }
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a number.");
         }
     }
 
 
-    /**
-     * Displays the interests of a friend's profile based on the passed User object.
-     *
-     * @param friend The User object representing the friend whose interests are to be viewed.
-     */
-    public void viewInterest(User friend) {
-        String nameOfFriend = friend.getFullName();
-        ArrayList<User> matchingUsers = userBST.searchUsersByName(nameOfFriend);
+
+    public void searchByName(Scanner input) {
+        System.out.println("Enter name of person to search for: ");
+        String searchName = input.nextLine();
+
+        // Create a list to store matching users
+        ArrayList<User> matchingUsers = new ArrayList<>();
+
+        // Search through all users
+        ArrayList<User> allUsers = userBST.getUsers();
+        for (User user : allUsers) {
+            if (user.getFullName().toLowerCase().contains(searchName.toLowerCase())) {
+                matchingUsers.add(user);
+            }
+        }
 
         if (matchingUsers.isEmpty()) {
-            System.out.println("No users found with the name: " + nameOfFriend);
+            System.out.println("No users found with that name.");
             return;
         }
 
-        User actualFriend = matchingUsers.get(0); // Can be improved if we handle multiple matches
-        LinkedList<Interests> friendInterests = interestManager.getInterestsByUserID(actualFriend.getId());
+        // Display header
+        System.out.println("\nFound " + matchingUsers.size() + " users with the name '" + searchName + "':");
+        System.out.println("Full Name                Username            ID");
+        System.out.println("------------------------------------------------");
 
-        if (friendInterests.isEmpty()) {
-            System.out.println(actualFriend.getFullName() + " has no interests listed.");
-        } else {
-            System.out.println(actualFriend.getFullName() + "'s interests:");
-            friendInterests.positionIterator();
-            while (!friendInterests.offEnd()) {
-                try {
-                    Interests interest = friendInterests.getIterator();
-                    System.out.println(interest.getInterestName());
-                    friendInterests.advanceIterator();
-                } catch (NoSuchElementException e) {
-                    System.err.println("Error while iterating through interests: " + e.getMessage());
+        // Display matching users
+        for (User user : matchingUsers) {
+            String formattedName = String.format("%-23s", user.getFullName());
+            String formattedUsername = String.format("%-19s", user.getUsername());
+            String formattedId = String.format("%-5d", user.getId());
+            System.out.println(formattedName + formattedUsername + formattedId);
+        }
+        System.out.println("------------------------------------------------");
+
+        // Select user
+        System.out.println("\nSelect user by number (or 0 to go back): ");
+        try {
+            int selection = Integer.parseInt(input.nextLine());
+
+            if (selection == 0) {
+                return;
+            }
+
+            if (selection < 1 || selection > matchingUsers.size()) {
+                System.out.println("Invalid selection.");
+                return;
+            }
+
+            User selectedUser = matchingUsers.get(selection - 1);
+
+            System.out.println("\nSelected: " + selectedUser.getFullName());
+            System.out.println("1. View Profile");
+            System.out.println("2. Add Friend");
+            System.out.println("3. Go Back");
+
+            int choice = Integer.parseInt(input.nextLine());
+
+            switch (choice) {
+                case 1:
+                    viewPersonProfile(selectedUser);
                     break;
-                }
+                case 2:
+                    addFriend(selectedUser);
+                    break;
+                case 3:
+                    return;
+                default:
+                    System.out.println("Invalid option.");
+            }
+
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a number.");
+        }
+    }
+
+
+    public void viewInterest(User friend) {
+        if (friend == null) {
+            System.out.println("Invalid user.");
+            return;
+        }
+        System.out.println("Interests:");
+        LinkedList<String> interests = interestManager.getInterestNamesForDisplay(friend.getId());  // Get interests
+
+        if (interests.isEmpty()) {
+            System.out.println(friend.getFullName() + " has no interests listed.");
+        } else {
+            interests.positionIterator();
+            while (!interests.offEnd()) {
+                System.out.println("- " + interests.getIterator());
+                interests.advanceIterator();
             }
         }
     }
 
-    /**
-     * Searches for users with a specific interest and prints their names.
-     * If the user is a friend, it appends "Already added" next to their name.
-     */
+
+
+
     public void searchByInterest() {
         System.out.println("Enter interest to search for: ");
         String interest = scanner.nextLine().trim();
@@ -367,96 +470,226 @@ public class UserInterface {
             return;
         }
 
+        // Get the list of users associated with the given interest
         LinkedList<String> usersWithInterest = interestManager.searchUsersByInterest(interest);
-
-        if (usersWithInterest.isEmpty()) {
+        if (usersWithInterest == null || usersWithInterest.isEmpty()) {
             System.out.println("No users found with the interest: " + interest);
-        } else {
-            System.out.println("Users found with the interest: " + interest);
+            return;
+        }
 
-            usersWithInterest.positionIterator();
-            while (!usersWithInterest.offEnd()) {
-                String userName = usersWithInterest.getIterator();
+        System.out.println("\nUsers with interest '" + interest + "':");
 
+        // Print header for output
+        System.out.println("Full Name                Username            ID              Status");
+        System.out.println("--------------------------------------------------------------------");
+
+        LinkedList<String> displayedUsers = new LinkedList<>();
+
+        // Iterate through users with the interest
+        usersWithInterest.positionIterator();
+        while (!usersWithInterest.offEnd()) {
+            String userName = usersWithInterest.getIterator().trim();
+
+            // Ensure the user is not duplicated in the display
+            if (!displayedUsers.contains(userName)) {
                 ArrayList<User> matchingUsers = userBST.searchUsersByName(userName);
-                if (matchingUsers.isEmpty()) {
-                    continue;
+
+                for (User user : matchingUsers) {
+                    boolean isFriend = friendGraph.isFriend(loggedInUser.getId(), user.getId());
+
+                    // Format user details
+                    String formattedName = String.format("%-23s", user.getFullName());
+                    String formattedUsername = String.format("%-19s", user.getUsername());
+                    String formattedId = String.format("%-15s", user.getId());
+                    String status = isFriend ? "(Already a friend)" : "";
+
+                    System.out.println(formattedName + formattedUsername + formattedId + status);
                 }
-
-                User user = matchingUsers.get(0);
-
-                int userId = user.getId();
-
-                boolean isFriend = friendGraph.isFriend(loggedInUser.getId(), userId);
-
-                if (isFriend) {
-                    System.out.println(user.getFullName() + " - Already added");
-                } else {
-                    System.out.println(user.getFullName());
-                }
-
-                usersWithInterest.advanceIterator();
+                displayedUsers.addLast(userName);
             }
-            System.out.println("\nEnter the name of the user to interact with: ");
-            String selectedUserName = scanner.nextLine().trim();
+            usersWithInterest.advanceIterator();
+        }
 
-            ArrayList<User> selectedUsers = userBST.searchUsersByName(selectedUserName);
-            if (selectedUsers.isEmpty()) {
-                System.out.println("No user found with the name: " + selectedUserName);
+        System.out.println("--------------------------------------------------------------------");
+
+        System.out.println("\nEnter the name of the user to interact with: ");
+        String selectedUserName = scanner.nextLine().trim();
+
+        // Find and interact with the selected user
+        ArrayList<User> selectedUsers = userBST.searchUsersByName(selectedUserName);
+        if (selectedUsers.isEmpty()) {
+            System.out.println("No user found with the name: " + selectedUserName);
+            return;
+        }
+
+        User selectedUser = selectedUsers.get(0);
+
+        System.out.println("Choose an option for " + selectedUser.getFullName() + ":");
+        System.out.println("1. View Profile");
+        System.out.println("2. Add as Friend");
+        System.out.println("3. Go Back");
+        System.out.print("Enter your choice: ");
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+
+        switch (choice) {
+            case 1:
+                viewPersonProfile(selectedUser);
+                break;
+            case 2:
+                addFriend(selectedUser);
+                break;
+            case 3:
                 return;
-            }
-
-            User selectedUser = selectedUsers.get(0);
-
-            System.out.println("Choose an option for " + selectedUser.getFullName() + ":");
-            System.out.println("1. View Profile");
-            System.out.println("2. Add as Friend");
-            System.out.println("3. Go Back");
-            System.out.print("Enter your choice: ");
-            int choice = scanner.nextInt();
-            scanner.nextLine();
-
-            switch (choice) {
-                case 1:
-                    viewFriendProfile(selectedUser);
-                    break;
-                case 2:
-                    addFriend(selectedUser);
-                    break;
-                case 3:
-                    makeNewFriend();
-                    break;
-                default:
-                    System.out.println("Invalid choice.");
-            }
+            default:
+                System.out.println("Invalid choice.");
+                break;
         }
     }
 
 
 
-    private void viewFriendProfile(User friendName) {
-        System.out.println("Username: " + friendName.getUsername());
-        System.out.println("ID: " + friendName.getId());
-        System.out.println("Full Name: " + friendName.getFullName());
-        System.out.println("City: " + friendName.getCity());
+
+    private void viewFriendProfile(User friend) {
+        if (friend == null) {
+            System.out.println("User not found.");
+            return;
+        }
+
+        // Display friend's profile information
+        System.out.println("\nProfile for " + friend.getFullName());
+        System.out.println("Username: " + friend.getUsername());
+        System.out.println("ID: " + friend.getId());
+        System.out.println("Full Name: " + friend.getFullName());
+        System.out.println("City: " + friend.getCity());
+
+        // Display interests using the updated viewInterest method
         System.out.println("Interests:");
-        viewInterest(friendName);
+        LinkedList<String> interests = interestManager.getInterestNamesForDisplay(friend.getId());
+        if (interests.isEmpty()) {
+            System.out.println(friend.getFullName() + " has no interests listed.");
+        } else {
+            interests.positionIterator();
+            while (!interests.offEnd()) {
+                System.out.println("- " + interests.getIterator());
+                interests.advanceIterator();
+            }
+        }
+
+        // Provide options to remove friend or go back
+        while (true) {
+            System.out.println("\nOptions:");
+            System.out.println("1. Remove Friend");
+            System.out.println("2. Go Back");
+            System.out.print("Choose an option: ");
+
+            int choice;
+            try {
+                choice = Integer.parseInt(scanner.nextLine().trim());
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number.");
+                continue;
+            }
+
+            switch (choice) {
+                case 1:
+                    removeFriend(friend);
+                    return; // Exit after removing friend
+                case 2:
+                    return; // Go back
+                default:
+                    System.out.println("Invalid option. Please choose again.");
+                    break;
+            }
+        }
+    }
+
+    private void viewPersonProfile(User friend) {
+        if (friend == null) {
+            System.out.println("User not found.");
+            return;
+        }
+
+        // Display friend's profile information
+        System.out.println("\nProfile for " + friend.getFullName());
+        System.out.println("Username: " + friend.getUsername());
+        System.out.println("ID: " + friend.getId());
+        System.out.println("Full Name: " + friend.getFullName());
+        System.out.println("City: " + friend.getCity());
+
+        // Display interests using the updated viewInterest method
+        System.out.println("Interests:");
+        LinkedList<String> interests = interestManager.getInterestNamesForDisplay(friend.getId());
+        if (interests.isEmpty()) {
+            System.out.println(friend.getFullName() + " has no interests listed.");
+        } else {
+            interests.positionIterator();
+            while (!interests.offEnd()) {
+                System.out.println("- " + interests.getIterator());
+                interests.advanceIterator();
+            }
+        }
+
+        // Provide options to remove friend or go back
+        while (true) {
+            System.out.println("\nOptions:");
+            System.out.println("1. Add Friend");
+            System.out.println("2. Go Back");
+            System.out.print("Choose an option: ");
+
+            int choice;
+            try {
+                choice = Integer.parseInt(scanner.nextLine().trim());
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number.");
+                continue;
+            }
+
+            switch (choice) {
+                case 1:
+                   addFriend(friend);
+                    return; // Exit after removing friend
+                case 2:
+                    return; // Go back
+                default:
+                    System.out.println("Invalid option. Please choose again.");
+                    break;
+            }
+        }
     }
 
 
     private void addFriend(User friend) {
-        friendGraph.addFriend(loggedInUser.getId(), friend.getId());
-        System.out.println(friend.getFullName() + " added as a friend.");
-        
+        boolean isFriend = friendGraph.isFriend(loggedInUser.getId(), friend.getId());
+        if(!isFriend) {
+            friendGraph.addFriend(loggedInUser.getId(), friend.getId());
+
+            Comparator<User> userComparator = (u1, u2) -> Integer.compare(u1.getId(), u2.getId());
+            loggedInUser.getFriends().insert(friend, userComparator);
+
+            friend.getFriends().insert(loggedInUser, userComparator);
+            System.out.println(friend.getFullName() + " added as a friend.");
+        } else {
+            System.out.println("You are already friends!");
+        }
     }
 
     private void removeFriend(User friend) {
         friendGraph.removeFriend(loggedInUser.getId(),friend.getId());
+        // Create a comparator that compares users by their ID (or any other field you prefer)
+        Comparator<User> userComparator = (u1, u2) -> Integer.compare(u1.getId(), u2.getId());
+
+        // Remove the friend from the logged-in user's friends BST
+        loggedInUser.getFriends().remove(friend, userComparator);
+
+        // Also remove the logged-in user from the friend's friends list
+        friend.getFriends().remove(loggedInUser, userComparator);
         System.out.println(friend.getFullName() + " removed as a friend.");
     }
 
     private void recommendFriends(){
         friendGraph.processUserFriendRecommendations(scanner, loggedInUser.getId());
+
         System.out.println("Enter the name of the user to interact with: ");
         String selectedUserName = scanner.nextLine().trim();
 
@@ -478,7 +711,7 @@ public class UserInterface {
 
         switch (choice) {
             case 1:
-                viewFriendProfile(selectedUser);
+                viewPersonProfile(selectedUser);
                 break;
             case 2:
                 addFriend(selectedUser);
@@ -488,11 +721,8 @@ public class UserInterface {
                 break;
             default:
                 System.out.println("Invalid choice.");
+                break; // Add break
         }
-    }
-
-    private int generateUserId(){
-        return loggedInUser == null ? 1 : loggedInUser.getId() + 1;
     }
 
 }
