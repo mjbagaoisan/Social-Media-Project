@@ -27,7 +27,7 @@ public class FriendGraph {
 
     public FriendGraph() {
         try {
-            friendNetwork = new Graph(100);
+            friendNetwork = new Graph(150);
         } catch (IllegalArgumentException e) {
             System.err.println("Failed to initialize Graph: " + e.getMessage());
             friendNetwork = null;

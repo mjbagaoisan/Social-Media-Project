@@ -143,6 +143,9 @@ public class UserInterface {
             interests.advanceIterator();
         }
 
+        friendGraph.addUser(newUser);
+
+
         System.out.println("Account created successfully!");
         loggedInUser = newUser;
 
@@ -467,52 +470,44 @@ public class UserInterface {
             return;
         }
 
+        // Get the list of users associated with the given interest
         LinkedList<String> usersWithInterest = interestManager.searchUsersByInterest(interest);
-        if (usersWithInterest.isEmpty()) {
+        if (usersWithInterest == null || usersWithInterest.isEmpty()) {
             System.out.println("No users found with the interest: " + interest);
             return;
         }
 
         System.out.println("\nUsers with interest '" + interest + "':");
 
-        // Print header
+        // Print header for output
         System.out.println("Full Name                Username            ID              Status");
         System.out.println("--------------------------------------------------------------------");
 
-        // Track displayed users to prevent duplicates
         LinkedList<String> displayedUsers = new LinkedList<>();
-        boolean hasDisplayedUsers = false;
 
+        // Iterate through users with the interest
         usersWithInterest.positionIterator();
         while (!usersWithInterest.offEnd()) {
-            String userName = usersWithInterest.getIterator();
+            String userName = usersWithInterest.getIterator().trim();
 
+            // Ensure the user is not duplicated in the display
             if (!displayedUsers.contains(userName)) {
                 ArrayList<User> matchingUsers = userBST.searchUsersByName(userName);
-                for (User user : matchingUsers) {
-                    if (user.getId() == loggedInUser.getId()) {
-                        // Skip logged-in user
-                        continue;
-                    }
 
+                for (User user : matchingUsers) {
                     boolean isFriend = friendGraph.isFriend(loggedInUser.getId(), user.getId());
 
-                    // Format output
+                    // Format user details
                     String formattedName = String.format("%-23s", user.getFullName());
                     String formattedUsername = String.format("%-19s", user.getUsername());
                     String formattedId = String.format("%-15s", user.getId());
                     String status = isFriend ? "(Already a friend)" : "";
 
                     System.out.println(formattedName + formattedUsername + formattedId + status);
-                    displayedUsers.addLast(userName);
-                    hasDisplayedUsers = true;
                 }
+                displayedUsers.addLast(userName);
             }
             usersWithInterest.advanceIterator();
-        }
-
-        if (!hasDisplayedUsers) {
-            System.out.println("No other users found with this interest.");
         }
 
         System.out.println("--------------------------------------------------------------------");
@@ -520,6 +515,7 @@ public class UserInterface {
         System.out.println("\nEnter the name of the user to interact with: ");
         String selectedUserName = scanner.nextLine().trim();
 
+        // Find and interact with the selected user
         ArrayList<User> selectedUsers = userBST.searchUsersByName(selectedUserName);
         if (selectedUsers.isEmpty()) {
             System.out.println("No user found with the name: " + selectedUserName);
@@ -550,6 +546,8 @@ public class UserInterface {
                 break;
         }
     }
+
+
 
 
     private void viewFriendProfile(User friend) {
