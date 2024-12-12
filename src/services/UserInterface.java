@@ -27,10 +27,13 @@ public class UserInterface {
     }
 
     public void startUI() {
-        mainMenu();
+        boolean running = true;
+        while (running) {
+            running = mainMenu();
+        }
     }
 
-    private void mainMenu() {
+    private boolean mainMenu() {
     int choice;
     while (true) {
         System.out.println("1. Login");
@@ -44,6 +47,7 @@ public class UserInterface {
         } else {
             System.out.println("Invalid input. Please enter a number.");
             scanner.nextLine(); // consume invalid input
+            return true;
         }
     }
 
@@ -57,11 +61,12 @@ public class UserInterface {
             case 3:
                 System.out.println("Saving data and exiting.... Goodbye!");
                 FileManager.saveData(userBST, dataTables, friendGraph, interestManager);
-                return;
+               return false;
             default:
                 System.out.println("Invalid choice.");
-                break;
+                return true;
         }
+    return true;
     }
 
     private void login() {
@@ -181,7 +186,7 @@ public class UserInterface {
                     System.out.println("Logging out!... Logged out.");
                     FileManager.saveData(userBST, dataTables, friendGraph, interestManager);
                     loggedInUser = null;
-                    mainMenu();
+                    return;
                 default:
                     System.out.println("Invalid choice.");
                     break; // Add break
