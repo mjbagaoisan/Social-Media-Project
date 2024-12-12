@@ -16,10 +16,11 @@ public class AuthHolder implements Comparable<AuthHolder> {
      * @param password The user's plain text password.
      * @param username The user's username.
      */
-    public AuthHolder(String username, String password){
+    public AuthHolder(String username, String password) {
         this.username = username;
-        try{
-            this.passwordHash = hashPassword(password);
+        try {
+            this.passwordHash = password.isEmpty() ? "" : hashPassword(password);
+            System.out.println("DEBUG: Created AuthHolder for " + username + " with hash: " + this.passwordHash);
         } catch (NoSuchAlgorithmException e) {
             System.err.println("Hashing algorithm not found: " + e.getMessage());
         }
@@ -55,6 +56,9 @@ public class AuthHolder implements Comparable<AuthHolder> {
     public boolean verifyPassword(String password) {
         try {
             String hashedInput = hashPassword(password);
+            System.out.println("DEBUG: Verifying password for " + username);
+            System.out.println("DEBUG: Stored hash: " + this.passwordHash);
+            System.out.println("DEBUG: Input hash: " + hashedInput);
             return this.passwordHash.equals(hashedInput);
         } catch (NoSuchAlgorithmException e) {
             System.err.println("Hashing algorithm not found: " + e.getMessage());
@@ -83,21 +87,26 @@ public class AuthHolder implements Comparable<AuthHolder> {
 
     @Override
     public int hashCode() {
-        // Include both username and passwordHash in hashCode
-        return Arrays.hashCode(new Object[]{username, passwordHash});
+        // Only use username for hashing
+        return username.hashCode();
     }
+
 
     @Override
     public boolean equals(Object obj) {
-        if(this == obj) {
+        if (this == obj) {
             return true;
         }
         if (!(obj instanceof AuthHolder)) {
             return false;
         }
         AuthHolder other = (AuthHolder) obj;
-        return this.username.equals(other.username) && this.passwordHash.equals(other.passwordHash);
+        boolean result = this.username.equals(other.username);
+        System.out.println("DEBUG: Comparing AuthHolders - this: " + this.username +
+                " other: " + other.username + " result: " + result);
+        return result;
     }
+
 
     @Override
     public int compareTo(AuthHolder other) {
@@ -113,5 +122,5 @@ public class AuthHolder implements Comparable<AuthHolder> {
         return "AuthHolder{username='" + username + "'}";
     }
 
-	
+
 }

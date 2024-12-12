@@ -22,25 +22,25 @@ public class User implements Serializable {
     private final int id;
     private static int idCounter = 0;
     private final LinkedList<String> interests;
+    private static int nextId = 1;
 
-    public User(String firstName, String lastName, String username, String password, int id, String city,LinkedList<String> interests, BST<User> friends) {
+    public User(String firstName, String lastName, String username, String password, int id, String city, LinkedList<String> interests, BST<User> friends) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.username = username;
         this.passwordHash = hashPassword(password);
         this.friends = new BST<>();
         this.city = city;
-        this.id = idCounter++;
+        this.id = nextId++;  // Use the static counter instead of the passed id
         this.interests = interests;
 
-        //For hashing
-        try{
+        try {
             this.passwordHashID = Math.abs(passwordToInteger(password));
         } catch (NoSuchAlgorithmException e) {
             System.err.println("Hashing algorithm not found: " + e.getMessage());
         }
-
     }
+
 
 
     private String hashPassword(String password) {

@@ -17,13 +17,22 @@ public class UserInterface {
     private UserBST userBST;
     private InterestManager interestManager;
     private FileManager fileManager;
+    private static int nextUserId = 1;
 
     public UserInterface() {
         this.dataTables = new DataTables(30);
         this.friendGraph = new FriendGraph();
         this.scanner = new Scanner(System.in);
-        this.userBST = userBST;
-        this.interestManager = interestManager;
+        this.userBST = new UserBST();
+        this.interestManager = new InterestManager(30);
+
+        // Load saved data
+        FileManager.loadData(userBST, dataTables);
+
+        // Synchronize auth data with BST
+        ArrayList<User> users = userBST.getUsers();
+        dataTables.loadAuthData(users);
+        System.out.println("DEBUG: Loaded " + users.size() + " users into auth system");
     }
 
     public void startUI() {
@@ -53,6 +62,7 @@ public class UserInterface {
                 default: 
                 System.out.println("Invalid choice.");
             }
+            System.out.println("Users in userBST: " + userBST.getUsers());
         }
     }
 
@@ -62,21 +72,30 @@ public class UserInterface {
         System.out.println("Password: ");
         String password = scanner.nextLine();
 
-        //Authenticate user using the DataTables class
-        String authenticatedUser = dataTables.authenticate(username,password);
-        if (!authenticatedUser.equals("invalid")) {
-            loggedInUser = new User("First", "Last", username, password, loggedInUser.getId(), "City", new LinkedList<>(), new BST<>());
-            if (loggedInUser != null) {
-                System.out.println("Login successful! Welcome, " + loggedInUser.getFullName());
-                userMenu();
-            }else{
-                System.out.println("User data not found. Please contact support.");
+        // First, try to find the user in the BST
+        ArrayList<User> users = userBST.getUsers();
+        User matchingUser = null;
+        for (User user : users) {
+            if (user.getUsername().equals(username)) {
+                matchingUser = user;
+                break;
             }
+        }
+
+        if (matchingUser == null) {
+            System.out.println("User not found.");
+            return;
+        }
+
+        // Then authenticate credentials
+        String authenticatedUser = dataTables.authenticate(username, password);
+        if (authenticatedUser.equals("valid")) {
+            loggedInUser = matchingUser;
+            System.out.println("Login successful! Welcome, " + loggedInUser.getFullName());
+            userMenu();
         } else {
             System.out.println("Invalid credentials.");
         }
-
-        userMenu();
     }
 
     private void createAccount() {
@@ -88,7 +107,18 @@ public class UserInterface {
         String username = scanner.nextLine();
         System.out.print("Password: ");
         String password = scanner.nextLine();
-        
+
+        // Debug output before registration
+        System.out.println("DEBUG: Attempting to register user: " + username);
+
+        // Check if registration is successful
+        if (!dataTables.register(username, password)) {
+            System.out.println("Username already exists. Please choose another.");
+            return;
+        }
+
+        System.out.println("DEBUG: Registration successful in DataTables");
+
         LinkedList<String> interests = new LinkedList<>();
         System.out.println("Enter interests (type 'done' to finish): ");
         while (true) {
@@ -99,18 +129,27 @@ public class UserInterface {
             interests.addLast(interest);
         }
 
-        int id = generateUserId();
-        User newUser = new User(firstName, lastName, username, password, id, "City", interests, new BST<>());
-        // Assuming register doesn't return anything, remove the success check.
-        dataTables.register(username, password);
+        User newUser = new User(firstName, lastName, username, password, nextUserId++, "City", interests, new BST<>());
+        System.out.println("DEBUG: Created new user object: " + newUser.toString());
+
+        userBST.insertUser(newUser);  // Using correct method name
+        System.out.println("DEBUG: BST size after insertion: " + userBST.getUsers().size());
+
+        // Add interests
         interests.positionIterator();
         while (!interests.offEnd()) {
             String interest = interests.getIterator();
-            dataTables.userHasInterest(interest, newUser);
+            interestManager.addInterest(interest, newUser);
             interests.advanceIterator();
         }
+
         System.out.println("Account created successfully!");
         loggedInUser = newUser;
+
+        // Debug output before saving
+        System.out.println("DEBUG: Attempting to save data...");
+        FileManager.saveData(userBST, dataTables);
+        System.out.println("DEBUG: Data save attempted");
 
         userMenu();
     }
@@ -478,7 +517,7 @@ public class UserInterface {
         }
     }
 
-    private int generateUserId(){
-        return loggedInUser == null ? 1 : loggedInUser.getId() + 1;
+    private int generateUserId() {
+        return nextUserId++;
     }
 }
