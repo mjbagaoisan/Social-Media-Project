@@ -17,7 +17,6 @@ public class UserInterface {
     private UserBST userBST;
     private InterestManager interestManager;
     private FileManager fileManager;
-    private static int nextUserId = 1;
 
     public UserInterface() {
         this.dataTables = new DataTables(30);
@@ -107,6 +106,8 @@ public class UserInterface {
         String username = scanner.nextLine();
         System.out.print("Password: ");
         String password = scanner.nextLine();
+        System.out.print("ID (Jersey Number): ");
+        int id = scanner.nextInt();
 
         // Debug output before registration
         System.out.println("DEBUG: Attempting to register user: " + username);
@@ -129,7 +130,7 @@ public class UserInterface {
             interests.addLast(interest);
         }
 
-        User newUser = new User(firstName, lastName, username, password, nextUserId++, "City", interests, new BST<>());
+        User newUser = new User(firstName, lastName, username, password, id, "City", interests, new BST<>());
         System.out.println("DEBUG: Created new user object: " + newUser.toString());
 
         userBST.insertUser(newUser);  // Using correct method name
@@ -517,7 +518,4 @@ public class UserInterface {
         }
     }
 
-    private int generateUserId() {
-        return nextUserId++;
-    }
 }

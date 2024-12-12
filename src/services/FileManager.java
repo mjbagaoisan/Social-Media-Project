@@ -43,20 +43,16 @@ public class FileManager {
                     int id = Integer.parseInt(line);
 
                     // Read name (ensuring we have input)
-                    if (!scanner.hasNext()) break;
                     String firstName = scanner.next().trim();
                     String lastName = scanner.nextLine().trim();
 
                     // Read username
-                    if (!scanner.hasNextLine()) break;
                     String username = scanner.nextLine().trim();
 
                     // Read password
-                    if (!scanner.hasNextLine()) break;
                     String password = scanner.nextLine().trim();
 
                     // Read number of friends
-                    if (!scanner.hasNextLine()) break;
                     int numFriends = Integer.parseInt(scanner.nextLine().trim());
 
                     // Store friendship data
@@ -71,11 +67,9 @@ public class FileManager {
                     friendships.add(friendshipData);
 
                     // Read city
-                    if (!scanner.hasNextLine()) break;
                     String city = scanner.nextLine().trim();
 
                     // Read interests
-                    if (!scanner.hasNextLine()) break;
                     int numInterests = Integer.parseInt(scanner.nextLine().trim());
                     LinkedList<String> interests = new LinkedList<>();
 
