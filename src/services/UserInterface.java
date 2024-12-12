@@ -6,8 +6,6 @@ import java.util.*;
 
 import dataStructures.BST;
 import dataStructures.LinkedList;
-import main.InterestManager;
-import services.FileManager;
 
 public class UserInterface {
     private Scanner scanner;
@@ -16,19 +14,18 @@ public class UserInterface {
     private User loggedInUser;
     private UserBST userBST;
     private InterestManager interestManager;
-    private FileManager fileManager;
 
     public UserInterface() {
         this.dataTables = new DataTables(30);
         this.friendGraph = new FriendGraph();
         this.scanner = new Scanner(System.in);
-        this.userBST = userBST;
-        this.interestManager = interestManager;
+       
     }
 
     public void startUI() {
         mainMenu();
     }
+    
 
     private void mainMenu() {
         while (true) {
@@ -75,8 +72,16 @@ public class UserInterface {
         } else {
             System.out.println("Invalid credentials.");
         }
+    }
 
-        userMenu();
+    private boolean isUsernameTaken(String username) {
+        // Use a loop or a method to check if the username already exists
+        for (User user : userBST.getUsers()) {
+            if (user.getUsername().equals(username)) {
+                return true; // Username is already taken
+            }
+        }
+        return false; // Username is available
     }
 
     private void createAccount() {
@@ -86,6 +91,10 @@ public class UserInterface {
         String lastName = scanner.nextLine();
         System.out.print("Username: ");
         String username = scanner.nextLine();
+        if (isUsernameTaken(username)) {
+            System.out.println("Username is already taken. Please choose a different username.");
+            return;
+        }
         System.out.print("Password: ");
         String password = scanner.nextLine();
         
@@ -111,8 +120,6 @@ public class UserInterface {
         }
         System.out.println("Account created successfully!");
         loggedInUser = newUser;
-
-        userMenu();
     }
 
     private void userMenu() {
