@@ -1,7 +1,6 @@
 package services;
 
 import main.*;
-//import java.io.*;
 import java.util.*;
 
 import dataStructures.BST;
@@ -14,12 +13,12 @@ public class UserInterface {
     private User loggedInUser;
     private UserBST userBST;
     private InterestManager interestManager;
+    //private FileManager fileManager;
 
     public UserInterface() {
         this.dataTables = new DataTables(30);
         this.friendGraph = new FriendGraph();
         this.scanner = new Scanner(System.in);
-       
     }
 
     public void startUI() {
@@ -29,26 +28,28 @@ public class UserInterface {
 
     private void mainMenu() {
         while (true) {
+            System.out.print("Choose an option: ");
             System.out.println("1. Login");
             System.out.println("2. Create Account");
-            System.out.println("3. Exit");
-            System.out.print("Choose an option: ");
+            System.out.println("3. Logout and Save Data");
             int choice = scanner.nextInt();
             scanner.nextLine(); // Consume newline
 
             switch (choice) {
                 case 1: 
-                login();
-                break;
+                    login();
+                    break;
                 case 2: 
-                createAccount();
-                break;
+                    createAccount();
+                    break;
                 case 3: {
+                    FileManager.saveData(userBST, dataTables);
+                    loggedInUser = null;
                     System.out.println("Goodbye!");
                     return;
                 }
                 default: 
-                System.out.println("Invalid choice.");
+                    System.out.println("Invalid choice.");
             }
         }
     }
@@ -126,7 +127,7 @@ public class UserInterface {
         while (true) {
             System.out.println("1. View Friends");
             System.out.println("2. Make New Friends");
-            System.out.println("3. Logout and Save Data");
+            System.out.println("3. Main Menu");
             System.out.print("Choose an option: ");
             int choice = scanner.nextInt();
             scanner.nextLine(); // Consume newline
@@ -134,17 +135,17 @@ public class UserInterface {
             switch (choice) {
                 case 1:
                     viewFriends();
-                break;
+                    break;
                 case 2:
                     makeNewFriend();
-                break;
+                    break;
                 case 3:{
-                    FileManager.saveData(userBST, dataTables);
-                    loggedInUser = null;
-                    return;
+                    mainMenu();
+                    break;
                 }
-                default: System.out.println("Invalid choice.");
-                break;
+                default: 
+                    System.out.println("Invalid choice.");
+                    break;
             }
         }
     }
@@ -161,15 +162,16 @@ public class UserInterface {
 
             switch (choice) {
                 case 1:
-                viewFriendsByName();
-                break;
+                    viewFriendsByName();
+                    break;
                 case 2:
-                searchForFriend();
-                break;
+                    searchForFriend();
+                    break;
                 case 3:
                     userMenu();
+                    break;
                 default:
-                System.out.println("Invalid choice.");
+                    System.out.println("Invalid choice.");
             }
         }
     }
@@ -186,18 +188,19 @@ public class UserInterface {
 
             switch (choice) {
                 case 1:
-                searchByName();
-                break;
+                    searchByName();
+                    break;
                 case 2:
-                searchByInterest();
-                break;
+                    searchByInterest();
+                    break;
                 case 3:
-                recommendFriends();
-                break;
+                    recommendFriends();
+                    break;
                 case 4:
-                userMenu();
+                    userMenu();
+                    break;
                 default:
-                System.out.println("Invalid choice.");
+                    System.out.println("Invalid choice.");
             }
         }
     }
@@ -238,14 +241,15 @@ public class UserInterface {
             switch (choice) {
                 case 1:
                     viewFriendProfile(matchingUsers.get(0));
-                break;
+                    break;
                 case 2:
                     removeFriend(matchingUsers.get(0));
-                break;
+                    break;
                 case 3:
                     viewFriends();
+                    break;
                 default:
-                System.out.println("Invalid choice.");
+                    System.out.println("Invalid choice.");
             }
         }
     }
@@ -302,7 +306,9 @@ public class UserInterface {
                         addFriend(selectedUser);
                         break;
                     case 3:
-                        return;
+                        makeNewFriend();
+                        break;
+                    
                     default:
                         System.out.println("Invalid choice. Please try again.");
                 }
@@ -488,4 +494,5 @@ public class UserInterface {
     private int generateUserId(){
         return loggedInUser == null ? 1 : loggedInUser.getId() + 1;
     }
+
 }
