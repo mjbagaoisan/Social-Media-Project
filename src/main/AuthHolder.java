@@ -75,19 +75,9 @@ public class AuthHolder implements Comparable<AuthHolder> {
         return username;
     }
 
-    /**
-     * Returns the password hash.
-     * Note: Consider avoiding exposing password hashes.
-     *
-     * @return The password hash.
-     */
-    public String getPasswordHash(){
-        return passwordHash;
-    }
 
     @Override
     public int hashCode() {
-        // Only use username for hashing
         return username.hashCode();
     }
 
