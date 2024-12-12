@@ -16,7 +16,7 @@ public class SocialMediaApp {
 
     public SocialMediaApp() {
         this.userBST = new UserBST();
-        this.dataTables = new DataTables(100);
+        this.dataTables = new DataTables(100, this.interestManager);
         this.friendGraph = new FriendGraph();
         this.interestManager = new InterestManager(30);
         this.fileManager = new FileManager();

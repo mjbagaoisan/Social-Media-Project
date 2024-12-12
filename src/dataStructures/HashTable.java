@@ -281,4 +281,9 @@ public class HashTable<T> {
 
         return sb.toString();
     }
+
+
+    public ArrayList<LinkedList<T>> getAllBuckets() {
+        return table;
+    }
 }

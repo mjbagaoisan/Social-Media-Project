@@ -49,7 +49,7 @@ public class FriendGraph {
     }
 
     public void addFriend(int user1, int user2) {
-        int vertex1 = user1 + 1;
+        int vertex1 = user1 + 1; // Convert to 1-based index
         int vertex2 = user2 + 1;
         if (friendNetwork == null) {
             System.err.println("Graph not initialized.");
@@ -57,17 +57,13 @@ public class FriendGraph {
         }
 
         try {
-            LinkedList<Integer> friendsList = friendNetwork.getAdjacencyList(vertex1);
-            if (!friendsList.contains(vertex2)) {
-                friendNetwork.addUndirectedEdge(vertex1, vertex2);
-                System.out.println(getUserNameById(user1) + " and " + getUserNameById(user2) + " are now friends.");
-            } else {
-                System.out.println(getUserNameById(user1) + " and " + getUserNameById(user2) + " are already friends.");
-            }
+            friendNetwork.addUndirectedEdge(vertex1, vertex2);
+            System.out.println("DEBUG: Added edge between User ID " + user1 + " and User ID " + user2);
         } catch (IndexOutOfBoundsException e) {
             System.err.println("Error adding friends: " + e.getMessage());
         }
     }
+
 
     public void removeFriend(int user1, int user2) {
         int vertex1 = user1 + 1;
@@ -328,35 +324,37 @@ public class FriendGraph {
     private int calculateSharedInterests(int vertexId, int friendId) {
         int sharedCount = 0;
 
+        // Get interests for both users
         LinkedList<Interests> interestsUser = getInterests(vertexId - 1);
         LinkedList<Interests> interestsFriend = getInterests(friendId);
 
-        if (interestsUser == null || interestsFriend == null) {
+        // If either list is empty, return 0 shared interests
+        if (interestsUser.isEmpty() || interestsFriend.isEmpty()) {
             return sharedCount;
         }
 
-        try {
-            interestsUser.positionIterator();
-            while (!interestsUser.offEnd()) {
-                Interests interestUser = interestsUser.getIterator();
-                String interestUserName = interestUser.getInterestName();
+        // Compare interests
+        interestsUser.positionIterator();
+        while (!interestsUser.offEnd()) {
+            try {
+                Interests userInterest = interestsUser.getIterator();
+                String userInterestName = userInterest.getInterestName();
 
                 interestsFriend.positionIterator();
                 while (!interestsFriend.offEnd()) {
-                    Interests interestFriend = interestsFriend.getIterator();
-                    String interestFriendName = interestFriend.getInterestName();
+                    Interests friendInterest = interestsFriend.getIterator();
+                    String friendInterestName = friendInterest.getInterestName();
 
-                    if (interestUserName.equalsIgnoreCase(interestFriendName)) {
+                    if (userInterestName.equalsIgnoreCase(friendInterestName)) {
                         sharedCount++;
                         break;
                     }
                     interestsFriend.advanceIterator();
                 }
-
                 interestsUser.advanceIterator();
+            } catch (NoSuchElementException | NullPointerException e) {
+                System.err.println("Error calculating shared interests: " + e.getMessage());
             }
-        } catch (NoSuchElementException | NullPointerException e) {
-            System.err.println("Error while calculating shared interests: " + e.getMessage());
         }
 
         return sharedCount;
@@ -365,7 +363,7 @@ public class FriendGraph {
     private LinkedList<Interests> getInterests(int userId) {
         if (!userIds.contains(userId)) {
             System.err.println("Invalid user ID for interests retrieval.");
-            return null;
+            return new LinkedList<>(); // Return empty list instead of null
         }
 
         return interestManager.getInterestsByUserID(userId);

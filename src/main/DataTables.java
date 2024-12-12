@@ -1,19 +1,23 @@
 package main;
 
 import dataStructures.HashTable;
+import dataStructures.LinkedList;
+
 import java.util.ArrayList;
 
 public class DataTables {
     private HashTable<Interests> ih;
     private static HashTable<AuthHolder> AH;  // Make this static
     private int ts;
+    private InterestManager interestManager;
 
-    public DataTables(int tableSize) {
+    public DataTables(int tableSize, InterestManager interestManager) {
         this.ts = tableSize;
         ih = new HashTable<>(tableSize);
         if (AH == null) {  // Only initialize if not already initialized
             AH = new HashTable<>(tableSize);
         }
+        this.interestManager = new InterestManager(tableSize);
     }
 
     public boolean register(String username, String password) {
@@ -76,9 +80,15 @@ public class DataTables {
 
 
     public void userHasInterest(String interest, User user) {
+        System.out.println("DEBUG: Associating interest: " + interest + " with user: " + user.getFullName());
         if (interest != null && user != null) {
             Interests newInterest = new Interests(interest, user);
             ih.add(newInterest);
+            // Also add to InterestManager
+            interestManager.addInterest(interest, user);
+            System.out.println("DEBUG: Successfully added interest to hash table and InterestManager");
         }
     }
+
+
 }

@@ -85,10 +85,14 @@ public class User implements Serializable {
     }
 
     public LinkedList<String> getInterests() {
-        return interests;
+        return this.interests;
     }
 
-
+    public boolean hasFriend(int friendId) {
+        if (friends == null) return false;
+        String inOrder = friends.inOrderString();
+        return inOrder.contains("ID=" + friendId + ",");
+    }
 
 
     public static int passwordToInteger(String password) throws NoSuchAlgorithmException {

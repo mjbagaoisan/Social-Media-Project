@@ -3,12 +3,10 @@ package services;
 import java.io.*;
 import java.util.*;
 
-import main.FriendGraph;
-import main.User;
-import main.UserBST;
+import main.*;
 import dataStructures.BST;
 import dataStructures.LinkedList;
-import main.DataTables;
+import main.InterestManager;
 
 public class FileManager {
 
@@ -17,12 +15,13 @@ public class FileManager {
         List<Integer> friendIds;
         DataTables dataTables;
         FriendGraph friendGraph;
+        InterestManager interestManager;
 
 
         FriendshipData(int userId) {
             this.userId = userId;
             this.friendIds = new ArrayList<>();
-            this.dataTables = new DataTables(100);
+            this.dataTables = new DataTables(100,  interestManager);
             this.friendGraph = new FriendGraph();
 
         }
@@ -35,27 +34,14 @@ public class FileManager {
         try (Scanner scanner = new Scanner(file)) {
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine().trim();
-
-                // Skip empty lines
-                if (line.isEmpty()) {
-                    continue;
-                }
+                if (line.isEmpty()) continue;
 
                 try {
-                    // Read user ID
                     int id = Integer.parseInt(line);
-
-                    // Read name (ensuring we have input)
                     String firstName = scanner.next().trim();
                     String lastName = scanner.nextLine().trim();
-
-                    // Read username
                     String username = scanner.nextLine().trim();
-
-                    // Read password
                     String password = scanner.nextLine().trim();
-
-                    // Read number of friends
                     int numFriends = Integer.parseInt(scanner.nextLine().trim());
 
                     // Store friendship data
@@ -69,18 +55,19 @@ public class FileManager {
                     }
                     friendships.add(friendshipData);
 
-                    // Read city
                     String city = scanner.nextLine().trim();
 
-                    // Read interests
+                    // Read and process interests
                     int numInterests = Integer.parseInt(scanner.nextLine().trim());
-                    LinkedList<String> interests = new LinkedList<>();
+                    System.out.println("DEBUG: Number of interests for user ID " + id + ": " + numInterests);
 
+                    LinkedList<String> interests = new LinkedList<>();
                     for (int i = 0; i < numInterests; i++) {
                         if (!scanner.hasNextLine()) break;
                         String interest = scanner.nextLine().trim();
                         if (!interest.isEmpty()) {
                             interests.addLast(interest);
+                            System.out.println("DEBUG: Adding interest: " + interest + " for user ID: " + id);
                         }
                     }
 
@@ -89,10 +76,12 @@ public class FileManager {
                     userBST.insertUser(user);
                     dataTables.register(username, password);
 
-                    // Register interests
+                    // Important: Add interests to InterestManager via DataTables
                     interests.positionIterator();
                     while (!interests.offEnd()) {
-                        dataTables.userHasInterest(interests.getIterator(), user);
+                        String interest = interests.getIterator();
+                        System.out.println("DEBUG: Registering interest: " + interest + " for user: " + user.getFullName());
+                        dataTables.userHasInterest(interest, user);  // This adds to InterestManager
                         interests.advanceIterator();
                     }
 
@@ -103,6 +92,7 @@ public class FileManager {
                     e.printStackTrace();
                 }
             }
+
 
             // Establish friendships after all users are loaded
             for (FriendshipData friendshipData : friendships) {
@@ -119,8 +109,7 @@ public class FileManager {
                 }
             }
 
-            // Now that all users and their friendships are in userBST,
-            // add them to the friendGraph
+
             ArrayList<User> allUsers = userBST.getUsers();
             for (User user : allUsers) {
                 friendGraph.addUser(user);
@@ -129,18 +118,14 @@ public class FileManager {
             // Add edges (friendships) to the friendGraph
             for (User user : allUsers) {
                 BST<User> friendsBST = user.getFriends();
-                // We need to get each friend from friendsBST. Assuming you have a method to get the BST contents:
-                // If not, you can parse friendsBST.inOrderString(), or if BST has a method inOrderTraversal() that returns an ArrayList:
 
-                // Example using inOrderString (if no direct method is available):
+
                 String friendsInOrder = friendsBST.inOrderString();
-                // Each line in friendsInOrder represents a User in format: User[ID=X, Username=..., FullName=...]
-                // We'll parse the ID:
+
                 String[] lines = friendsInOrder.split("\n");
                 for (String l : lines) {
                     if (l.trim().isEmpty()) continue;
-                    // Extract ID from the string:
-                    // Format assumed: User[ID=X, Username=..., FullName=...]
+
                     int start = l.indexOf("ID=") + 3;
                     int end = l.indexOf(",", start);
                     String idStr = l.substring(start, end).trim();
