@@ -16,7 +16,7 @@ public class SocialMediaApp {
 
     public SocialMediaApp() {
         this.interestManager = new InterestManager(30);
-        this.dataTables = new DataTables(100, this.interestManager);// Initialize InterestManager first
+        this.dataTables = new DataTables(300, this.interestManager);// Initialize InterestManager first
         this.userBST = new UserBST();
          // Now pass the initialized interestManager
         this.friendGraph = new FriendGraph();
