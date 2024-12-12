@@ -31,7 +31,7 @@ public class UserFriend {
      * @return User with the matching username, or null if not found
      */
     public User searchUserByUsername(String username) {
-        // Create a dummy user with the username to use in search
+      
         User dummyUser = new User(
             "", 
             "", 
@@ -54,17 +54,17 @@ public class UserFriend {
     public ArrayList<User> searchUsersByName(String name) {
         ArrayList<User> matchingUsers = new ArrayList<>();
         
-        // Get users as a string using inOrderString
+       
         String[] userStrings = allUsersBST.inOrderString().split("\n");
         
-        // Convert search name to lowercase for case-insensitive search
+      
         String searchName = name.toLowerCase();
         
         // Parse and check each user
         for (String userStr : userStrings) {
             User user = parseUser(userStr);
             if (user != null) {
-                // Check if full name contains the search name
+                
                 if (user.getFullName().toLowerCase().contains(searchName)) {
                     matchingUsers.add(user);
                 }
@@ -101,17 +101,15 @@ public class UserFriend {
      * @return Parsed User object or null
      */
     private User parseUser(String userStr) {
-        // This is a placeholder and should be replaced with actual parsing logic
-        // The implementation depends on how User's toString() method is defined
+      
         try {
-            // Example parsing (this needs to match your User's toString() format)
+           
             String[] parts = userStr.split(",");
             if (parts.length >= 2) {
-                // Assuming toString() format is "FirstName LastName, Username, ..."
+          
                 String[] nameParts = parts[0].trim().split(" ");
                 if (nameParts.length >= 2) {
-                    // Create a new User object with parsed information
-                    // Note: This is a simplified example and may need adjustment
+                    
                     return new User(
                       nameParts[0], 
                       nameParts[1], 
