@@ -13,18 +13,14 @@ public class UserBST {
 
     public UserBST() {
         userNameBST = new BST<>();
-        System.out.println("DEBUG: Created new UserBST");
     }
 
     public void insertUser(User user) {
-        System.out.println("DEBUG: Attempting to insert user: " + user.getFullName());
         if (user == null) {
-            System.out.println("DEBUG: User is null!");
             return;
         }
         userNameBST.insert(user, nameComparator);
         userReferences.add(user); // Keep the actual reference here
-        System.out.println("DEBUG: User inserted...");
     }
 
     public ArrayList<User> getUsers() {

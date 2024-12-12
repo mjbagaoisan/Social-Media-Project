@@ -19,7 +19,7 @@ Ishoot3pointers
 3
 23
 7
-34
+2
 San Francisco
 2
 Gaming
@@ -152,20 +152,20 @@ password888
 3
 22
 77
-1
+21
 Boston
 2
 Bowling
 Photography
 
-1
+88
 Devin Booker
 devin_booker
 password999
 3
 22
 45
-0
+77
 Phoenix
 2
 Gaming
@@ -176,8 +176,8 @@ Donovan Mitchell
 donovan_mitchell
 password1010
 3
-1
-45
+88
+77
 22
 Utah
 3
@@ -185,41 +185,28 @@ Golfing
 Fishing
 Photography
 
-12
-Ja Morant
-Ja_Morant12
+99
+Zion Williamson
+zion_williamson
 password1212
+3
+22
+45
+88
+New Orleans
+2
+Bowling
+Gaming
+
+12
+James Harden
+Ja_Morant12
+password333
 3
 23
 30
 7
-Memphis
+Brooklyn
 2
 Photography
 Gaming
-
-88
-James Harden
-james_harden_2
-password333
-3
-3
-21
-34
-Houston
-2
-Gaming
-Traveling
-
-99
-Stephen Curry
-StephenC
-password987
-3
-7
-13
-22
-Oakland
-2
-Reading
-Golfing

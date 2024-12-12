@@ -20,7 +20,6 @@ public class AuthHolder implements Comparable<AuthHolder> {
         this.username = username;
         try {
             this.passwordHash = password.isEmpty() ? "" : hashPassword(password);
-            System.out.println("DEBUG: Created AuthHolder for " + username + " with hash: " + this.passwordHash);
         } catch (NoSuchAlgorithmException e) {
             System.err.println("Hashing algorithm not found: " + e.getMessage());
         }
@@ -56,9 +55,6 @@ public class AuthHolder implements Comparable<AuthHolder> {
     public boolean verifyPassword(String password) {
         try {
             String hashedInput = hashPassword(password);
-            System.out.println("DEBUG: Verifying password for " + username);
-            System.out.println("DEBUG: Stored hash: " + this.passwordHash);
-            System.out.println("DEBUG: Input hash: " + hashedInput);
             return this.passwordHash.equals(hashedInput);
         } catch (NoSuchAlgorithmException e) {
             System.err.println("Hashing algorithm not found: " + e.getMessage());
@@ -92,8 +88,6 @@ public class AuthHolder implements Comparable<AuthHolder> {
         }
         AuthHolder other = (AuthHolder) obj;
         boolean result = this.username.equals(other.username);
-        System.out.println("DEBUG: Comparing AuthHolders - this: " + this.username +
-                " other: " + other.username + " result: " + result);
         return result;
     }
 

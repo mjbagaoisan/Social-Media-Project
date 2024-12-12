@@ -34,7 +34,10 @@ public class FriendGraph {
         }
         names = new ArrayList<>();
         userIds = new ArrayList<>();
-        interestManager = new InterestManager(100);
+    }
+
+    public void setInterestManager(InterestManager interestManager) {
+        this.interestManager = interestManager;
     }
 
     public void addUser(User user) {
@@ -58,7 +61,6 @@ public class FriendGraph {
 
         try {
             friendNetwork.addUndirectedEdge(vertex1, vertex2);
-            System.out.println("DEBUG: Added edge between User ID " + user1 + " and User ID " + user2);
         } catch (IndexOutOfBoundsException e) {
             System.err.println("Error adding friends: " + e.getMessage());
         }
@@ -193,7 +195,7 @@ public class FriendGraph {
     }
 
     public void processUserFriendRecommendations(Scanner input, int userId) {
-        int vertexId = userId + 1;
+        int vertexId = userId + 1;  // Changed from userId - 1 to userId + 1 to match rest of the code
         if (friendNetwork == null) {
             System.err.println("Graph not initialized.");
             return;
@@ -205,61 +207,96 @@ public class FriendGraph {
         }
 
         try {
-            friendNetwork.BFS(vertexId);
+            friendNetwork.BFS(vertexId);  // Using corrected vertexId
         } catch (IndexOutOfBoundsException e) {
             System.err.println("Error performing BFS: " + e.getMessage());
             return;
         }
 
         ArrayList<FriendRecommendation> recommendations = new ArrayList<>();
-        LinkedList<Integer> directFriendsList;
+        LinkedList<Integer> currentFriends;
 
         try {
-            directFriendsList = friendNetwork.getAdjacencyList(vertexId);
+            currentFriends = friendNetwork.getAdjacencyList(vertexId);
         } catch (IndexOutOfBoundsException e) {
             System.err.println("Error retrieving direct friends: " + e.getMessage());
             return;
         }
 
-        ArrayList<Integer> currentFriends = new ArrayList<>();
+        // Get current friends into ArrayList for easier lookup
+        ArrayList<Integer> friendsList = new ArrayList<>();
         try {
-            directFriendsList.positionIterator();
-            while (!directFriendsList.offEnd()) {
-                currentFriends.add(directFriendsList.getIterator());
-                directFriendsList.advanceIterator();
+            currentFriends.positionIterator();
+            while (!currentFriends.offEnd()) {
+                friendsList.add(currentFriends.getIterator());
+                currentFriends.advanceIterator();
             }
         } catch (NoSuchElementException e) {
             System.err.println("Error processing current friends: " + e.getMessage());
         }
 
+        // Process potential friend recommendations
         for (int i = 0; i < userIds.size(); i++) {
             int potentialUserId = userIds.get(i);
-            if (potentialUserId == userId || currentFriends.contains(potentialUserId + 1)) {
+
+            // Skip if it's the user themselves
+            if (potentialUserId == userId) {
+                continue;
+            }
+
+            // Skip if they're already friends
+            boolean isAlreadyFriend = false;
+            for (Integer friendId : friendsList) {
+                if (friendId == potentialUserId + 1) {  // Convert potential user ID to vertex ID for comparison
+                    isAlreadyFriend = true;
+                    break;
+                }
+            }
+            if (isAlreadyFriend) {
+                continue;
+            }
+
+            // Check if this user ID is already in recommendations
+            boolean alreadyRecommended = false;
+            for (FriendRecommendation rec : recommendations) {
+                if (rec.userId == potentialUserId) {
+                    alreadyRecommended = true;
+                    break;
+                }
+            }
+            if (alreadyRecommended) {
                 continue;
             }
 
             int distance = -1;
             try {
-                distance = friendNetwork.getDistance(potentialUserId + 1);
+                distance = friendNetwork.getDistance(potentialUserId + 1);  // Convert to vertex ID
             } catch (IndexOutOfBoundsException e) {
                 System.err.println("Error retrieving distance for User ID " + potentialUserId + ": " + e.getMessage());
                 continue;
             }
 
-            int sharedInterests = calculateSharedInterests(vertexId, potentialUserId);
-
             if (distance > 0 && distance < Integer.MAX_VALUE) {
+                int sharedInterests = calculateSharedInterests(vertexId, potentialUserId);
                 recommendations.add(new FriendRecommendation(potentialUserId, distance, sharedInterests));
             }
         }
 
-        recommendations.sort((rec1, rec2) -> {
-            if (rec1.distance != rec2.distance) {
-                return Integer.compare(rec1.distance, rec2.distance);
-            }
-            return Integer.compare(rec2.sharedInterests, rec1.sharedInterests);
-        });
+        // Sort recommendations
+        for (int i = 0; i < recommendations.size() - 1; i++) {
+            for (int j = 0; j < recommendations.size() - i - 1; j++) {
+                FriendRecommendation rec1 = recommendations.get(j);
+                FriendRecommendation rec2 = recommendations.get(j + 1);
 
+                if (rec1.distance > rec2.distance ||
+                        (rec1.distance == rec2.distance && rec1.sharedInterests < rec2.sharedInterests)) {
+                    recommendations.set(j, rec2);
+                    recommendations.set(j + 1, rec1);
+                }
+            }
+        }
+
+        // Display recommendations
         System.out.println("\nHere are your recommended friends:");
         if (recommendations.isEmpty()) {
             System.out.println("\nSorry! We don't have any recommendations for you at this time.");
@@ -268,45 +305,50 @@ public class FriendGraph {
 
         for (int i = 0; i < recommendations.size(); i++) {
             FriendRecommendation rec = recommendations.get(i);
-            System.out.println((i + 1) + ". " + getUserNameById(rec.userId) +
-                    " (Distance: " + rec.distance + ", Shared Interests: " + rec.sharedInterests + ")");
+            String recommendedName = getUserNameById(rec.userId);
+            if (recommendedName != null) {
+                System.out.println((i + 1) + ". " + recommendedName +
+                        " (Distance: " + rec.distance + ", Shared Interests: " +
+                        rec.sharedInterests + ")");
+            }
         }
     }
 
     private int calculateSharedInterests(int vertexId, int friendId) {
+        if (interestManager == null) {
+            return 0;
+        }
+
+        // Convert vertex IDs to user IDs
+        int userId = vertexId - 1;
+        int friendUserId = friendId; // friendId is already a user ID
+
+        // Get interests using InterestManager's display method
+        LinkedList<String> userInterests = interestManager.getInterestNamesForDisplay(userId);
+        LinkedList<String> friendInterests = interestManager.getInterestNamesForDisplay(friendUserId);
+
         int sharedCount = 0;
 
-        // Get interests for both users
-        LinkedList<Interests> interestsUser = getInterests(vertexId - 1);
-        LinkedList<Interests> interestsFriend = getInterests(friendId);
-
-        // If either list is empty, return 0 shared interests
-        if (interestsUser.isEmpty() || interestsFriend.isEmpty()) {
-            return sharedCount;
+        // If either list is empty, return 0
+        if (userInterests.isEmpty() || friendInterests.isEmpty()) {
+            return 0;
         }
 
         // Compare interests
-        interestsUser.positionIterator();
-        while (!interestsUser.offEnd()) {
-            try {
-                Interests userInterest = interestsUser.getIterator();
-                String userInterestName = userInterest.getInterestName();
+        userInterests.positionIterator();
+        while (!userInterests.offEnd()) {
+            String userInterest = userInterests.getIterator();
 
-                interestsFriend.positionIterator();
-                while (!interestsFriend.offEnd()) {
-                    Interests friendInterest = interestsFriend.getIterator();
-                    String friendInterestName = friendInterest.getInterestName();
+            friendInterests.positionIterator();
+            while (!friendInterests.offEnd()) {
+                String friendInterest = friendInterests.getIterator();
 
-                    if (userInterestName.equalsIgnoreCase(friendInterestName)) {
-                        sharedCount++;
-                        break;
-                    }
-                    interestsFriend.advanceIterator();
+                if (userInterest.equalsIgnoreCase(friendInterest)) {
+                    sharedCount++;
                 }
-                interestsUser.advanceIterator();
-            } catch (NoSuchElementException | NullPointerException e) {
-                System.err.println("Error calculating shared interests: " + e.getMessage());
+                friendInterests.advanceIterator();
             }
+            userInterests.advanceIterator();
         }
 
         return sharedCount;

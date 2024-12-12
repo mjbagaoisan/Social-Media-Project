@@ -53,6 +53,7 @@ public class User implements Serializable {
     }
 
     // Getters
+
     public String getFullName() {
         return firstName + " " + lastName;
     }

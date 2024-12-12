@@ -20,6 +20,7 @@ public class SocialMediaApp {
         this.userBST = new UserBST();
          // Now pass the initialized interestManager
         this.friendGraph = new FriendGraph();
+        this.friendGraph.setInterestManager(this.interestManager);
         this.fileManager = new FileManager();
     }
 
@@ -27,17 +28,12 @@ public class SocialMediaApp {
 
     public void loadUsers() {
         FileManager.loadData(userBST, dataTables, friendGraph, interestManager);
-        System.out.println("DEBUG: After loading data, checking user friends:");
-        ArrayList<User> allUsers = userBST.getUsers();
-        for (User u : allUsers) {
-            String friendsStr = u.getFriends().inOrderString();
-            System.out.println(u.getFullName() + " friends in BST: " + friendsStr);
-        }
+
 
     }
 
     public void saveUsers() {
-        FileManager.saveData(userBST, dataTables);
+        FileManager.saveData(userBST, dataTables, friendGraph, interestManager);
     }
 
     public void start() {

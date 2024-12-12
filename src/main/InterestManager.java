@@ -20,16 +20,31 @@ public class InterestManager {
     }
 
     public void addInterest(String interest, User user) {
-        if (interest == null || user == null) return;
+        if (interest == null || user == null) {
+            return;
+        }
 
-        Interests newInterest = new Interests(interest, user);
-        interestsTable.add(newInterest);
-        interestsList.addLast(newInterest);
+        // Check if this exact interest-user combination already exists
+        boolean exists = false;
+        interestsList.positionIterator();
+        while (!interestsList.offEnd()) {
+            Interests current = interestsList.getIterator();
+            if (current.getInterestName().equals(interest) &&
+                    current.getUser().getId() == user.getId()) {
+                exists = true;
+                break;
+            }
+            interestsList.advanceIterator();
+        }
 
-        System.out.println("DEBUG: Adding interest to InterestManager: " + interest +
-                " for user: " + user.getFullName());
-
+        // Only add if it doesn't already exist
+        if (!exists) {
+            Interests newInterest = new Interests(interest, user);
+            interestsTable.add(newInterest);
+            interestsList.addLast(newInterest);
+        }
     }
+
 
     public LinkedList<Interests> getInterestsByUserID(int userID) {
         LinkedList<Interests> userInterests = new LinkedList<>();
@@ -48,11 +63,9 @@ public class InterestManager {
             }
         }
 
-        // Debugging
-        System.out.println("DEBUG: Retrieved interests for user ID: " + userID);
+
         userInterests.positionIterator();
         while (!userInterests.offEnd()) {
-            System.out.println("DEBUG: Interest: " + userInterests.getIterator().getInterestName());
             userInterests.advanceIterator();
         }
 
@@ -93,14 +106,22 @@ public class InterestManager {
 
     public LinkedList<String> getInterestNamesForDisplay(int userID) {
         LinkedList<String> userInterests = new LinkedList<>();
-        interestsList.positionIterator();
 
+
+        interestsList.positionIterator();
         while (!interestsList.offEnd()) {
-            Interests currentInterest = interestsList.getIterator();
-            if (currentInterest.getUser().getId() == userID) {
-                userInterests.addLast(currentInterest.getInterestName());
+            try {
+                Interests currentInterest = interestsList.getIterator();
+                User interestUser = currentInterest.getUser();
+
+                if (interestUser != null && interestUser.getId() == userID) {
+                    String interestName = currentInterest.getInterestName();
+                    userInterests.addLast(interestName);
+                }
+                interestsList.advanceIterator();
+            } catch (Exception e) {
+                System.err.println("Error retrieving interest: " + e.getMessage());
             }
-            interestsList.advanceIterator();
         }
 
         return userInterests;

@@ -60,7 +60,6 @@ public class FileManager {
 
                     // Read and process interests
                     int numInterests = Integer.parseInt(scanner.nextLine().trim());
-                    System.out.println("DEBUG: Number of interests for user ID " + id + ": " + numInterests);
 
                     LinkedList<String> interests = new LinkedList<>();
                     for (int i = 0; i < numInterests; i++) {
@@ -68,7 +67,6 @@ public class FileManager {
                         String interest = scanner.nextLine().trim();
                         if (!interest.isEmpty()) {
                             interests.addLast(interest);
-                            System.out.println("DEBUG: Adding interest: " + interest + " for user ID: " + id);
                         }
                     }
 
@@ -77,15 +75,13 @@ public class FileManager {
                     userBST.insertUser(user);
                     dataTables.register(username, password);
 
-                    // Add interests to InterestManager via DataTables
+
                     interests.positionIterator();
                     while (!interests.offEnd()) {
                         String interest = interests.getIterator();
-                        System.out.println("DEBUG: Registering interest: " + interest + " for user: " + user.getFullName());
-                        dataTables.userHasInterest(interest, user);  // This should add the interest to InterestManager
+                        dataTables.userHasInterest(interest, user);
                         interests.advanceIterator();
                     }
-
 
                 } catch (NumberFormatException e) {
                     System.err.println("Error parsing number: " + e.getMessage());
@@ -104,7 +100,6 @@ public class FileManager {
                         ArrayList<User> friendList = userBST.searchUsersById(friendId);
                         if (!friendList.isEmpty()) {
                             user.getFriends().insert(friendList.get(0), (u1, u2) -> u1.getId() - u2.getId());
-                            System.out.println("Added friend " + friendList.get(0).getFullName() + " to " + user.getFullName());
                         }
                     }
                 }
@@ -133,11 +128,9 @@ public class FileManager {
             }
 
             for (User user : userBST.getUsers()) {
-                System.out.println("DEBUG: Loaded user: " + user.getFullName());
                 LinkedList<String> userInterests = user.getInterests();
                 userInterests.positionIterator();
                 while (!userInterests.offEnd()) {
-                    System.out.println("DEBUG: Loaded interest: " + userInterests.getIterator());
                     userInterests.advanceIterator();
                 }
 
@@ -148,11 +141,12 @@ public class FileManager {
         }
     }
 
-    public static void saveData(UserBST userBST, DataTables dataTables) {
+    public static void saveData(UserBST userBST, DataTables dataTables, FriendGraph friendGraph, InterestManager interestManager) {
         try (PrintWriter writer = new PrintWriter(new FileWriter("NewData.txt"))) {
             ArrayList<User> users = userBST.getUsers();
 
             for (User user : users) {
+                // Write user details
                 writer.println(user.getId());
                 writer.println(user.getFullName());
                 writer.println(user.getUsername());
@@ -165,11 +159,18 @@ public class FileManager {
                 String[] friendsArray = friendsList.split("\n");
                 for (String friendStr : friendsArray) {
                     if (!friendStr.trim().isEmpty()) {
-                        writer.println(friendStr.trim());
+                        // Extract friend ID from the inOrderString
+                        int start = friendStr.indexOf("ID=") + 3;
+                        int end = friendStr.indexOf(",", start);
+                        String idStr = friendStr.substring(start, end).trim();
+                        writer.println(idStr);
                     }
                 }
 
+                // Write city
                 writer.println(user.getCity());
+
+                // Write interests
                 LinkedList<String> interests = user.getInterests();
                 writer.println(interests.getLength());
 
@@ -178,6 +179,9 @@ public class FileManager {
                     writer.println(interests.getIterator());
                     interests.advanceIterator();
                 }
+
+                // Add an empty line between users for clarity
+                writer.println();
             }
         } catch (IOException e) {
             System.err.println("Error writing to file: " + e.getMessage());
