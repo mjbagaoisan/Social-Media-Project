@@ -45,7 +45,7 @@ public class AuthHolder implements Comparable<AuthHolder> {
             hexString.append(hex);
         }
         return hexString.toString();
-        }
+    }
 
     /**
      * Verifies if the provided password matches the stored password hash.

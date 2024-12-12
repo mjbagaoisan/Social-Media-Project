@@ -7,7 +7,6 @@ public class DataTables {
     private HashTable<Interests> ih;
     private static HashTable<AuthHolder> AH;  // Make this static
     private int ts;
-    private static final String DEFAULT_PASSWORD = "defaultpass123";
 
     public DataTables(int tableSize) {
         this.ts = tableSize;
@@ -26,10 +25,7 @@ public class DataTables {
                 System.out.println("DEBUG: User already exists in auth table");
                 return false;
             }
-
-            // Use a fixed password for testing if none provided
-            String actualPassword = (password == null || password.isEmpty()) ? DEFAULT_PASSWORD : password;
-            AuthHolder newUser = new AuthHolder(username, actualPassword);
+            AuthHolder newUser = new AuthHolder(username, password);
             AH.add(newUser);
             System.out.println("DEBUG: Successfully registered " + username + " with password");
             return true;
@@ -74,7 +70,7 @@ public class DataTables {
     public void loadAuthData(ArrayList<User> users) {
         System.out.println("DEBUG: Loading auth data for " + users.size() + " users");
         for (User user : users) {
-            register(user.getUsername(), DEFAULT_PASSWORD);
+            register(user.getUsername(), user.getPasswordHash());
         }
     }
 
