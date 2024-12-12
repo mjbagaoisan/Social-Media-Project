@@ -181,7 +181,7 @@ public class UserInterface {
                     System.out.println("Logging out!... Logged out.");
                     FileManager.saveData(userBST, dataTables, friendGraph, interestManager);
                     loggedInUser = null;
-                    return;
+                    mainMenu();
                 default:
                     System.out.println("Invalid choice.");
                     break; // Add break
