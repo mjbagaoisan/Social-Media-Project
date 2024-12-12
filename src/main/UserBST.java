@@ -3,119 +3,99 @@ package main;
 import dataStructures.BST;
 import java.util.ArrayList;
 import java.util.Comparator;
+import dataStructures.LinkedList;
 
 public class UserBST {
-    // BST to store users sorted by full name
     private BST<User> userNameBST;
+    private Comparator<User> nameComparator = (u1, u2) ->
+            u1.getFullName().compareToIgnoreCase(u2.getFullName());
+    private ArrayList<User> userReferences = new ArrayList<>();
 
-    // Comparator for sorting users by full name
-    private Comparator<User> nameComparator = (u1, u2) -> 
-        u1.getFullName().compareToIgnoreCase(u2.getFullName());
-
-    /**
-     * Default constructor initializes empty BST
-     */
     public UserBST() {
         userNameBST = new BST<>();
     }
 
-    /**
-     * Insert a user into the BST
-     * @param user User to insert
-     */
     public void insertUser(User user) {
-        userNameBST.insert(user, nameComparator);
-    }
-
-    /**
-     * Get all users from the BST in sorted order by name
-     * @return List of users sorted by full name
-     */
-    public ArrayList<User> getUsers() {
-        ArrayList<User> users = new ArrayList<>();
-        inOrderTraversal(userNameBST, users);
-        return users;
-    }
-
-    /**
-     * In-order traversal of the BST to collect users
-     * @param bst Current BST
-     * @param users List to store the collected users
-     */
-    private void inOrderTraversal(BST<User> bst, ArrayList<User> users) {
-        // Split the inOrderString into individual user strings
-        String[] userStrings = bst.inOrderString().split("\n");
-        
-        // Attempt to parse each user string
-        for (String userStr : userStrings) {
-            if (!userStr.trim().isEmpty()) {
-                User user = parseUser(userStr);
-                if (user != null) {
-                    users.add(user);
-                }
-            }
+        if (user == null) {
+            return;
         }
+        userNameBST.insert(user, nameComparator);
+        userReferences.add(user); // Keep the actual reference here
     }
 
-    /**
-     * Search for users by full name
-     * @param name Name to search for
-     * @return ArrayList of users with matching names
-     */
+    public ArrayList<User> getUsers() {
+        // Return a copy of the list to avoid accidental modifications outside this class
+        return new ArrayList<>(userReferences);
+    }
+
     public ArrayList<User> searchUsersByName(String name) {
         ArrayList<User> matchingUsers = new ArrayList<>();
-        
-        // Get all users
         ArrayList<User> allUsers = getUsers();
-        
-        // Convert search name to lowercase for case-insensitive search
         String searchName = name.toLowerCase();
-        
-        // Find users whose full name contains the search name
+
         for (User user : allUsers) {
             if (user.getFullName().toLowerCase().contains(searchName)) {
                 matchingUsers.add(user);
             }
         }
-        
         return matchingUsers;
     }
 
+    public ArrayList<User> searchUsersById(int id) {
+        ArrayList<User> matchingUsers = new ArrayList<>();
+        ArrayList<User> allUsers = getUsers();
 
-
-
-    /**
-     * Helper method to parse a user from a string representation
-     * @param userStr String representation of a user
-     * @return Parsed User object or null
-     */
-    private User parseUser(String userStr) {
-        // This is a placeholder and should be replaced with actual parsing logic
-        // The implementation depends on how User's toString() method is defined
-        try {
-            // Example parsing (this needs to match your User's toString() format)
-            String[] parts = userStr.split(",");
-            if (parts.length >= 2) {
-                // Assuming toString() format is "FirstName LastName, Username, ..."
-                String[] nameParts = parts[0].trim().split(" ");
-                if (nameParts.length >= 2) {
-                    // Create a new User object with parsed information
-                    // Note: This is a simplified example and may need adjustment
-                    return new User(
-                        nameParts[0], 
-                        nameParts[1], 
-                        parts[1].trim(), 
-                        "tempPassword", 
-                        0, 
-                        null, 
-                        null, 
-                        null
-                    );
-                }
+        for (User user : allUsers) {
+            if (user.getId() == id) {
+                matchingUsers.add(user);
             }
-            return null;
-        } catch (Exception e) {
-            return null;
+        }
+        return matchingUsers;
+    }
+
+    public void addFriendship(User user1, User user2) {
+        if (user1 == null || user2 == null) return;
+
+        // Check if friendship already exists
+        if (!user1.hasFriend(user2.getId())) {
+            user1.getFriends().insert(user2, (u1, u2) -> u1.getId() - u2.getId());
+            System.out.println("Added friend " + user2.getFullName() + " to " + user1.getFullName());
         }
     }
+
+    public LinkedList<User> getUniqueUserFriends(User user) {
+        LinkedList<User> uniqueFriends = new LinkedList<>();
+        if (user.getFriends() == null) return uniqueFriends;
+
+        String[] friendsList = user.getFriends().inOrderString().split("\n");
+        for (String friendStr : friendsList) {
+            if (!friendStr.trim().isEmpty()) {
+                // Extract ID from the friend string
+                int start = friendStr.indexOf("ID=") + 3;
+                int end = friendStr.indexOf(",", start);
+                try {
+                    int friendId = Integer.parseInt(friendStr.substring(start, end).trim());
+                    ArrayList<User> friend = searchUsersById(friendId);
+                    if (!friend.isEmpty() && !containsFriend(uniqueFriends, friendId)) {
+                        uniqueFriends.addLast(friend.get(0));
+                    }
+                } catch (NumberFormatException e) {
+                    System.err.println("Error parsing friend ID: " + e.getMessage());
+                }
+            }
+        }
+        return uniqueFriends;
+    }
+
+    private boolean containsFriend(LinkedList<User> friends, int userId) {
+        friends.positionIterator();
+        while (!friends.offEnd()) {
+            if (friends.getIterator().getId() == userId) {
+                return true;
+            }
+            friends.advanceIterator();
+        }
+        return false;
+    }
+
 }

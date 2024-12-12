@@ -13,9 +13,6 @@ public class FriendGraph {
 
     private InterestManager interestManager;
 
-    /**
-     * Inner class to store information about a friend's recommendation.
-     */
     public class FriendRecommendation {
         int userId;
         int distance;
@@ -28,12 +25,6 @@ public class FriendGraph {
         }
     }
 
-    /**
-     * Constructor initializes the friend network graph, user names list,
-     * user IDs list, and the interest manager.
-     *
-     * Note: Graph is initialized with 78 vertices to accommodate User IDs up to 77.
-     */
     public FriendGraph() {
         try {
             friendNetwork = new Graph(100);
@@ -43,91 +34,23 @@ public class FriendGraph {
         }
         names = new ArrayList<>();
         userIds = new ArrayList<>();
-        interestManager = new InterestManager(100); // Initialize with desired HashTable size
     }
 
-    /**
-     * Adds a new user to the friend network.
-     * Maps User ID directly to Graph Vertex ID.
-     *
-     * @param user The User object to add.
-     */
+    public void setInterestManager(InterestManager interestManager) {
+        this.interestManager = interestManager;
+    }
+
     public void addUser(User user) {
         if (friendNetwork == null) {
             System.err.println("Graph not initialized. Cannot add user.");
             return;
         }
 
-        int userId = user.getId(); // Assuming User class has getId() method
+        int userId = user.getId();
         userIds.add(userId);
         names.add(user.getFullName());
-
-        // Interests are managed separately via InterestManager
     }
 
-    /**
-     * Prints the friend graph, displaying each user and their friends.
-     * Maps User IDs directly to Graph vertex IDs.
-     */
-    public void getFriendGraph() {
-        if (friendNetwork == null) {
-            System.err.println("Graph not initialized.");
-            return;
-        }
-
-        System.out.println("Friend Graph:");
-        for (int i = 0; i < userIds.size(); i++) {
-            int userId = userIds.get(i);
-            String userName = names.get(i);
-            LinkedList<Integer> friendsList;
-            try {
-                friendsList = friendNetwork.getAdjacencyList(userId);
-            } catch (IndexOutOfBoundsException e) {
-                System.err.println("Error retrieving adjacency list for User ID " + userId + ": " + e.getMessage());
-                continue;
-            }
-
-            System.out.print(userName + " (ID: " + userId + ") has friends: ");
-            if (friendsList.getLength() == 0) {
-                System.out.println("No friends");
-                continue;
-            }
-
-            friendsList.positionIterator();
-            boolean first = true;
-            while (!friendsList.offEnd()) {
-                try {
-                    int friendVertexId = friendsList.getIterator();
-                    String friendName = getUserNameById(friendVertexId);
-
-                    if (friendName == null) {
-                        System.err.println("Invalid friend vertex ID: " + friendVertexId);
-                        friendsList.advanceIterator();
-                        continue;
-                    }
-
-                    if (!first) {
-                        System.out.print(", ");
-                    }
-                    System.out.print(friendName + " (ID: " + friendVertexId + ")");
-                    first = false;
-                    friendsList.advanceIterator();
-                } catch (NoSuchElementException e) {
-                    System.err.println("Error iterating friends: " + e.getMessage());
-                    break;
-                }
-            }
-            System.out.println();
-        }
-    }
-
-    /**
-     * Adds a friend to the user's friend list.
-     * Maps User IDs directly to Graph vertex IDs.
-     *
-     * @param user1 The ID of the first user.
-     * @param user2 The ID of the second user.
-     */
     public void addFriend(int user1, int user2) {
         int vertex1 = user1 + 1; // Convert to 1-based index
         int vertex2 = user2 + 1;
@@ -137,34 +60,21 @@ public class FriendGraph {
         }
 
         try {
-            LinkedList<Integer> friendsList = friendNetwork.getAdjacencyList(user1);
-            if (!friendsList.contains(user2)) { // Check if already friends
-                friendNetwork.addUndirectedEdge(vertex1, vertex2);
-                System.out.println(getUserNameById(user1) + " and " + getUserNameById(user2) + " are now friends.");
-            } else {
-                System.out.println(getUserNameById(user1) + " and " + getUserNameById(user2) + " are already friends.");
-            }
+            friendNetwork.addUndirectedEdge(vertex1, vertex2);
         } catch (IndexOutOfBoundsException e) {
             System.err.println("Error adding friends: " + e.getMessage());
         }
     }
 
-    /**
-     * Removes a friend from the user's friend list.
-     * Maps User IDs directly to Graph vertex IDs.
-     *
-     * @param user1 The ID of the first user.
-     * @param user2 The ID of the second user.
-     */
+
     public void removeFriend(int user1, int user2) {
-        int vertex1 = user1 + 1; // Convert to 1-based index
+        int vertex1 = user1 + 1;
         int vertex2 = user2 + 1;
         if (friendNetwork == null) {
             System.err.println("Graph not initialized.");
             return;
         }
 
-        // Validate user IDs
         if (!userIds.contains(user1) || !userIds.contains(user2)) {
             System.err.println("One or both User IDs provided do not exist.");
             return;
@@ -178,7 +88,7 @@ public class FriendGraph {
             friendsUser1.positionIterator();
             while (!friendsUser1.offEnd()) {
                 if (friendsUser1.getIterator() == vertex2) {
-                    friendsUser1.removeIterator(); // Remove friend2 from user1's list
+                    friendsUser1.removeIterator();
                     removedFromUser1 = true;
                     break;
                 }
@@ -193,7 +103,7 @@ public class FriendGraph {
             friendsUser2.positionIterator();
             while (!friendsUser2.offEnd()) {
                 if (friendsUser2.getIterator() == vertex1) {
-                    friendsUser2.removeIterator(); // Remove friend1 from user2's list
+                    friendsUser2.removeIterator();
                     removedFromUser2 = true;
                     break;
                 }
@@ -210,47 +120,41 @@ public class FriendGraph {
         }
     }
 
-    /**
-     * Prints the list of friends for the specified user.
-     * Maps User IDs directly to Graph vertex IDs.
-     *
-     * @param user The ID of the user whose friends are to be displayed.
-     */
-    public void getFriends(int user) {
-        int vertex = user + 1;
+    public void getFriends(int userId) {
+        int vertexId = userId + 1; // Convert user ID to graph vertex ID
         if (friendNetwork == null) {
             System.err.println("Graph not initialized.");
             return;
         }
 
         // Validate user ID
-        if (!userIds.contains(user)) {
-            System.err.println("User ID " + user + " does not exist.");
+        if (!userIds.contains(userId)) {
+            System.err.println("User ID " + userId + " does not exist.");
             return;
         }
 
-        // Need to sort by name
-
         try {
-            LinkedList<Integer> friendsList = friendNetwork.getAdjacencyList(vertex);
-            System.out.println(getUserNameById(user) + "'s Friends:");
-            if (friendsList.getLength() == 0) {
-                System.out.println("No friends");
+            LinkedList<Integer> friendsList = friendNetwork.getAdjacencyList(vertexId);
+            System.out.println(getUserNameById(userId) + "'s Friends:");
+
+            if (friendsList.isEmpty()) {
+                System.out.println("No friends.");
                 return;
             }
 
             friendsList.positionIterator();
             while (!friendsList.offEnd()) {
                 int friendVertexId = friendsList.getIterator();
-                String friendName = getUserNameById(friendVertexId);
+                int friendUserId = friendVertexId - 1; // Convert vertex ID back to user ID
 
-                if (friendName == null) {
-                    System.err.println("Invalid friend vertex ID: " + friendVertexId);
-                    friendsList.advanceIterator();
-                    continue;
+                if (friendUserId != userId) { // Avoid self-loop errors
+                    String friendName = getUserNameById(friendUserId);
+                    if (friendName != null) {
+                        System.out.println("- " + friendName + " (ID: " + friendUserId + ")");
+                    } else {
+                        System.err.println("Invalid friend vertex ID: " + friendVertexId);
+                    }
                 }
-
-                System.out.println("- " + friendName + " (ID: " + friendVertexId + ")");
                 friendsList.advanceIterator();
             }
         } catch (IndexOutOfBoundsException | NoSuchElementException e) {
@@ -258,82 +162,17 @@ public class FriendGraph {
         }
     }
 
-    /**
-     * Finds and prints the mutual friends between two users.
-     * Maps User IDs directly to Graph vertex IDs.
-     *
-     * @param user1 The ID of the first user.
-     * @param user2 The ID of the second user.
-     */
-    public void getMutualFriends(int user1, int user2) {
-        int vertex1 = user1 + 1; // Convert to 1-based index
-        int vertex2 = user2 + 1; // Convert to 1-based index
-        if (friendNetwork == null) {
-            System.err.println("Graph not initialized.");
-            return;
-        }
 
-        // Validate user IDs
-        if (!userIds.contains(user1) || !userIds.contains(user2)) {
-            System.err.println("One or both User IDs provided do not exist.");
-            return;
-        }
 
-        ArrayList<Integer> mutualFriends = new ArrayList<>();
 
-        try {
-            LinkedList<Integer> friendsUser1 = friendNetwork.getAdjacencyList(vertex1);
-            LinkedList<Integer> friendsUser2 = friendNetwork.getAdjacencyList(vertex2);
-
-            // Collect friends of user1
-            ArrayList<Integer> user1Friends = new ArrayList<>();
-            friendsUser1.positionIterator();
-            while (!friendsUser1.offEnd()) {
-                int friendVertexId = friendsUser1.getIterator();
-                user1Friends.add(friendVertexId);
-                friendsUser1.advanceIterator();
-            }
-
-            // Collect friends of user2 and find mutuals
-            friendsUser2.positionIterator();
-            while (!friendsUser2.offEnd()) {
-                int friendVertexId = friendsUser2.getIterator();
-                if (user1Friends.contains(friendVertexId)) {
-                    mutualFriends.add(friendVertexId);
-                }
-                friendsUser2.advanceIterator();
-            }
-
-            if (!mutualFriends.isEmpty()) {
-                System.out.println("Mutual friends between " + getUserNameById(user1) + " and " + getUserNameById(user2) + ":");
-                for (Integer friendVertexId : mutualFriends) {
-                    System.out.println("- " + getUserNameById(friendVertexId) + " (ID: " + friendVertexId + ")");
-                }
-            } else {
-                System.out.println("No mutual friends found.");
-            }
-        } catch (IndexOutOfBoundsException | NoSuchElementException e) {
-            System.err.println("Error finding mutual friends: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Checks if two users are friends.
-     * Maps User IDs directly to Graph vertex IDs.
-     *
-     * @param user1 The ID of the first user.
-     * @param user2 The ID of the second user.
-     * @return True if the users are friends, otherwise false.
-     */
     public boolean isFriend(int user1, int user2) {
-        int vertex1 = user1 + 1; // Convert to 1-based index
-        int vertex2 = user2 + 1; // Convert to 1-based index
+        int vertex1 = user1 + 1;
+        int vertex2 = user2 + 1;
         if (friendNetwork == null) {
             System.err.println("Graph not initialized.");
             return false;
         }
 
-        // Validate user IDs
         if (!userIds.contains(user1) || !userIds.contains(user2)) {
             System.err.println("One or both User IDs provided do not exist.");
             return false;
@@ -343,7 +182,7 @@ public class FriendGraph {
             LinkedList<Integer> friends = friendNetwork.getAdjacencyList(vertex1);
             friends.positionIterator();
             while (!friends.offEnd()) {
-                if (friends.getIterator() == vertex2) { // Check if user2 is in user1's friends
+                if (friends.getIterator() == vertex2) {
                     return true;
                 }
                 friends.advanceIterator();
@@ -355,85 +194,109 @@ public class FriendGraph {
         return false;
     }
 
-    /**
-     * Processes friend recommendations for the selected user based on network connections and shared interests.
-     * Maps User IDs directly to Graph vertex IDs.
-     *
-     * @param input  Scanner for user input.
-     * @param userId Selected user ID.
-     */
     public void processUserFriendRecommendations(Scanner input, int userId) {
-        int vertexId = userId + 1;
+        int vertexId = userId + 1;  // Changed from userId - 1 to userId + 1 to match rest of the code
         if (friendNetwork == null) {
             System.err.println("Graph not initialized.");
             return;
         }
 
-        // Validate user ID
-        if (!userIds.contains(vertexId)) {
+        if (!userIds.contains(userId)) {
             System.err.println("Invalid user ID provided.");
             return;
         }
 
-        // Perform BFS to calculate distances
         try {
-            friendNetwork.BFS(vertexId);
+            friendNetwork.BFS(vertexId);  // Using corrected vertexId
         } catch (IndexOutOfBoundsException e) {
             System.err.println("Error performing BFS: " + e.getMessage());
             return;
         }
 
         ArrayList<FriendRecommendation> recommendations = new ArrayList<>();
-        LinkedList<Integer> directFriendsList;
+        LinkedList<Integer> currentFriends;
 
         try {
-            directFriendsList = friendNetwork.getAdjacencyList(vertexId);
+            currentFriends = friendNetwork.getAdjacencyList(vertexId);
         } catch (IndexOutOfBoundsException e) {
             System.err.println("Error retrieving direct friends: " + e.getMessage());
             return;
         }
 
-        ArrayList<Integer> currentFriends = new ArrayList<>();
+        // Get current friends into ArrayList for easier lookup
+        ArrayList<Integer> friendsList = new ArrayList<>();
         try {
-            directFriendsList.positionIterator();
-            while (!directFriendsList.offEnd()) {
-                int friendVertexId = directFriendsList.getIterator();
-                currentFriends.add(friendVertexId);
-                directFriendsList.advanceIterator();
+            currentFriends.positionIterator();
+            while (!currentFriends.offEnd()) {
+                friendsList.add(currentFriends.getIterator());
+                currentFriends.advanceIterator();
             }
         } catch (NoSuchElementException e) {
             System.err.println("Error processing current friends: " + e.getMessage());
         }
 
+        // Process potential friend recommendations
         for (int i = 0; i < userIds.size(); i++) {
             int potentialUserId = userIds.get(i);
-            if (potentialUserId == userId || currentFriends.contains(potentialUserId)) {
+
+            // Skip if it's the user themselves
+            if (potentialUserId == userId) {
+                continue;
+            }
+
+            // Skip if they're already friends
+            boolean isAlreadyFriend = false;
+            for (Integer friendId : friendsList) {
+                if (friendId == potentialUserId + 1) {  // Convert potential user ID to vertex ID for comparison
+                    isAlreadyFriend = true;
+                    break;
+                }
+            }
+            if (isAlreadyFriend) {
+                continue;
+            }
+
+            // Check if this user ID is already in recommendations
+            boolean alreadyRecommended = false;
+            for (FriendRecommendation rec : recommendations) {
+                if (rec.userId == potentialUserId) {
+                    alreadyRecommended = true;
+                    break;
+                }
+            }
+            if (alreadyRecommended) {
                 continue;
             }
 
             int distance = -1;
             try {
-                distance = friendNetwork.getDistance(potentialUserId);
+                distance = friendNetwork.getDistance(potentialUserId + 1);  // Convert to vertex ID
             } catch (IndexOutOfBoundsException e) {
                 System.err.println("Error retrieving distance for User ID " + potentialUserId + ": " + e.getMessage());
                 continue;
             }
 
-            int sharedInterests = calculateSharedInterests(vertexId, potentialUserId);
-
             if (distance > 0 && distance < Integer.MAX_VALUE) {
+                int sharedInterests = calculateSharedInterests(vertexId, potentialUserId);
                 recommendations.add(new FriendRecommendation(potentialUserId, distance, sharedInterests));
             }
         }
 
-        // Sort recommendations: first by distance ascending, then by sharedInterests descending
-        recommendations.sort((rec1, rec2) -> {
-            if (rec1.distance != rec2.distance) {
-                return Integer.compare(rec1.distance, rec2.distance);
-            }
-            return Integer.compare(rec2.sharedInterests, rec1.sharedInterests);
-        });
+        // Sort recommendations
+        for (int i = 0; i < recommendations.size() - 1; i++) {
+            for (int j = 0; j < recommendations.size() - i - 1; j++) {
+                FriendRecommendation rec1 = recommendations.get(j);
+                FriendRecommendation rec2 = recommendations.get(j + 1);
 
+                if (rec1.distance > rec2.distance ||
+                        (rec1.distance == rec2.distance && rec1.sharedInterests < rec2.sharedInterests)) {
+                    recommendations.set(j, rec2);
+                    recommendations.set(j + 1, rec1);
+                }
+            }
+        }
+
+        // Display recommendations
         System.out.println("\nHere are your recommended friends:");
         if (recommendations.isEmpty()) {
             System.out.println("\nSorry! We don't have any recommendations for you at this time.");
@@ -442,77 +305,64 @@ public class FriendGraph {
 
         for (int i = 0; i < recommendations.size(); i++) {
             FriendRecommendation rec = recommendations.get(i);
-            System.out.println((i + 1) + ". " + getUserNameById(rec.userId) +
-                    " (Distance: " + rec.distance + ", Shared Interests: " + rec.sharedInterests + ")");
+            String recommendedName = getUserNameById(rec.userId);
+            if (recommendedName != null) {
+                System.out.println((i + 1) + ". " + recommendedName +
+                        " (Distance: " + rec.distance + ", Shared Interests: " +
+                        rec.sharedInterests + ")");
+            }
         }
     }
 
-    /**
-     * Calculates the number of shared interests between the user and a potential friend.
-     * Uses nested loops instead of a HashSet for comparison.
-     *
-     * @param userId   The ID of the current user.
-     * @param friendId The ID of the potential friend.
-     * @return The number of shared interests.
-     */
-    private int calculateSharedInterests(int userId, int friendId) {
-        int sharedCount = 0;
-
-        LinkedList<Interests> interestsUser = getInterests(userId);
-        LinkedList<Interests> interestsFriend = getInterests(friendId);
-
-        if (interestsUser == null || interestsFriend == null) {
-            return sharedCount;
+    private int calculateSharedInterests(int vertexId, int friendId) {
+        if (interestManager == null) {
+            return 0;
         }
 
-        try {
-            interestsUser.positionIterator();
-            while (!interestsUser.offEnd()) {
-                Interests interestUser = interestsUser.getIterator();
-                String interestUserName = interestUser.getInterestName();
+        // Convert vertex IDs to user IDs
+        int userId = vertexId - 1;
+        int friendUserId = friendId; // friendId is already a user ID
 
-                interestsFriend.positionIterator();
-                while (!interestsFriend.offEnd()) {
-                    Interests interestFriend = interestsFriend.getIterator();
-                    String interestFriendName = interestFriend.getInterestName();
+        // Get interests using InterestManager's display method
+        LinkedList<String> userInterests = interestManager.getInterestNamesForDisplay(userId);
+        LinkedList<String> friendInterests = interestManager.getInterestNamesForDisplay(friendUserId);
 
-                    if (interestUserName.equalsIgnoreCase(interestFriendName)) {
-                        sharedCount++;
-                        break; // Avoid counting duplicate interests
-                    }
-                    interestsFriend.advanceIterator();
+        int sharedCount = 0;
+
+        // If either list is empty, return 0
+        if (userInterests.isEmpty() || friendInterests.isEmpty()) {
+            return 0;
+        }
+
+        // Compare interests
+        userInterests.positionIterator();
+        while (!userInterests.offEnd()) {
+            String userInterest = userInterests.getIterator();
+
+            friendInterests.positionIterator();
+            while (!friendInterests.offEnd()) {
+                String friendInterest = friendInterests.getIterator();
+
+                if (userInterest.equalsIgnoreCase(friendInterest)) {
+                    sharedCount++;
                 }
-
-                interestsUser.advanceIterator();
+                friendInterests.advanceIterator();
             }
-        } catch (NoSuchElementException | NullPointerException e) {
-            System.err.println("Error while calculating shared interests: " + e.getMessage());
+            userInterests.advanceIterator();
         }
 
         return sharedCount;
     }
 
-    /**
-     * Retrieves the interests for a specific user.
-     *
-     * @param userId The ID of the user whose interests are to be retrieved.
-     * @return The LinkedList of Interests for the user.
-     */
     private LinkedList<Interests> getInterests(int userId) {
         if (!userIds.contains(userId)) {
             System.err.println("Invalid user ID for interests retrieval.");
-            return null;
+            return new LinkedList<>(); // Return empty list instead of null
         }
 
         return interestManager.getInterestsByUserID(userId);
     }
 
-    /**
-     * Helper method to get a user's name by their User ID.
-     *
-     * @param userId The User ID.
-     * @return The full name of the user, or null if not found.
-     */
     private String getUserNameById(int userId) {
         int index = userIds.indexOf(userId);
         if (index != -1 && index < names.size()) {

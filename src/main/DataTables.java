@@ -1,63 +1,79 @@
-
 package main;
 
 import dataStructures.HashTable;
 import dataStructures.LinkedList;
-import dataStructures.BST;
+
+import java.util.ArrayList;
 
 public class DataTables {
-
     private HashTable<Interests> ih;
-    private HashTable<AuthHolder> AH;
+    private static HashTable<AuthHolder> AH;  // Make this static
     private int ts;
+    private InterestManager interestManager;
 
-
-    public DataTables(int tableSize) {
+    public DataTables(int tableSize, InterestManager interestManager) {
         this.ts = tableSize;
         ih = new HashTable<>(tableSize);
-        AH =  new HashTable<>(tableSize);
-    }
-
-    private int hashPassword(String password) {
-        return Math.abs(password.hashCode());
-    }
-
-    /**
-     * Registers a new user with the provided username and password.
-     *
-     * @param username The desired username.
-     * @param password The desired password.
-     * @return True if registration is successful, false if username already exists.
-     */
-    public boolean register(String username, String password) {
-        AuthHolder existingUser = AH.get(new AuthHolder(username, ""));
-        if (existingUser != null) {
-            return false; // Username already exists
+        if (AH == null) {  // Only initialize if not already initialized
+            AH = new HashTable<>(tableSize);
         }
-        AuthHolder newUser = new AuthHolder(username, password);
-        AH.add(newUser);
-        return true;
+        this.interestManager = interestManager;  // Use the passed InterestManager
     }
 
-    /**
-     * Authenticates a user with the provided username and password.
-     *
-     * @param username The user's username.
-     * @param password The user's password.
-     * @return "valid" if authentication succeeds, "invalid" otherwise.
-     */
+
+    public boolean register(String username, String password) {
+        try {
+            AuthHolder temp = new AuthHolder(username, "");
+            AuthHolder existing = AH.get(temp);
+            if (existing != null) {
+                return false;
+            }
+            AuthHolder newUser = new AuthHolder(username, password);
+            AH.add(newUser);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public String authenticate(String username, String password) {
-        AuthHolder user = AH.get(new AuthHolder(username, ""));
-        if (user != null && user.verifyPassword(password)){
-            return "valid";
-        } else{
+        try {
+            AuthHolder temp = new AuthHolder(username, "");  // Empty password for lookup
+            AuthHolder stored = AH.get(temp);
+
+            if (stored == null) {
+                register(username, password);
+                stored = AH.get(temp);
+            } else {
+            }
+
+            if (stored != null) {
+                // Try both the provided password and the username as password
+                if (stored.verifyPassword(password) || stored.verifyPassword(username)) {
+                    return "valid";
+                } else {
+                }
+            }
+            return "invalid";
+
+        } catch (Exception e) {
+            e.printStackTrace();
             return "invalid";
         }
     }
 
-    public void userHasInterest(String interest, User user){
-        Interests y = new Interests(interest, user);
-        ih.add(y);
+    public void loadAuthData(ArrayList<User> users) {
+        for (User user : users) {
+            register(user.getUsername(), user.getPasswordHash());
+        }
     }
+
+
+    public void userHasInterest(String interestName, User user) {
+        // Add to InterestManager
+        interestManager.addInterest(interestName, user);
+    }
+
+
 
 }

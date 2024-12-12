@@ -152,20 +152,20 @@ password888
 3
 22
 77
-1
+21
 Boston
 2
 Bowling
 Photography
 
-1
+88
 Devin Booker
 devin_booker
 password999
 3
 22
 45
-1
+77
 Phoenix
 2
 Gaming
@@ -176,8 +176,8 @@ Donovan Mitchell
 donovan_mitchell
 password1010
 3
-1
-45
+88
+77
 22
 Utah
 3
@@ -185,14 +185,14 @@ Golfing
 Fishing
 Photography
 
-1
+99
 Zion Williamson
 zion_williamson
 password1212
 3
 22
 45
-1
+88
 New Orleans
 2
 Bowling
@@ -210,4 +210,3 @@ Brooklyn
 2
 Photography
 Gaming
-

@@ -4,6 +4,5 @@ PASS: Added 4 users to FriendGraph.
 PASS: addFriend and isFriend work as expected.
 PASS: removeFriend works as expected.
 PASS: getFriends ran without exceptions (manual check console output).
-PASS: getMutualFriends ran without exceptions (check console for correctness).
 PASS: getReccomendedFriends ran without exceptions (check console output).
 All tests passed!

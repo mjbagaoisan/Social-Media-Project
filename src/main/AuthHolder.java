@@ -16,10 +16,10 @@ public class AuthHolder implements Comparable<AuthHolder> {
      * @param password The user's plain text password.
      * @param username The user's username.
      */
-    public AuthHolder(String username, String password){
+    public AuthHolder(String username, String password) {
         this.username = username;
-        try{
-            this.passwordHash = hashPassword(password);
+        try {
+            this.passwordHash = password.isEmpty() ? "" : hashPassword(password);
         } catch (NoSuchAlgorithmException e) {
             System.err.println("Hashing algorithm not found: " + e.getMessage());
         }
@@ -44,7 +44,7 @@ public class AuthHolder implements Comparable<AuthHolder> {
             hexString.append(hex);
         }
         return hexString.toString();
-        }
+    }
 
     /**
      * Verifies if the provided password matches the stored password hash.
@@ -71,33 +71,26 @@ public class AuthHolder implements Comparable<AuthHolder> {
         return username;
     }
 
-    /**
-     * Returns the password hash.
-     * Note: Consider avoiding exposing password hashes.
-     *
-     * @return The password hash.
-     */
-    public String getPasswordHash(){
-        return passwordHash;
-    }
 
     @Override
     public int hashCode() {
-        // Include both username and passwordHash in hashCode
-        return Arrays.hashCode(new Object[]{username, passwordHash});
+        return username.hashCode();
     }
+
 
     @Override
     public boolean equals(Object obj) {
-        if(this == obj) {
+        if (this == obj) {
             return true;
         }
         if (!(obj instanceof AuthHolder)) {
             return false;
         }
         AuthHolder other = (AuthHolder) obj;
-        return this.username.equals(other.username) && this.passwordHash.equals(other.passwordHash);
+        boolean result = this.username.equals(other.username);
+        return result;
     }
+
 
     @Override
     public int compareTo(AuthHolder other) {
@@ -113,5 +106,5 @@ public class AuthHolder implements Comparable<AuthHolder> {
         return "AuthHolder{username='" + username + "'}";
     }
 
-	
+
 }

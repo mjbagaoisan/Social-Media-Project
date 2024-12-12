@@ -22,10 +22,10 @@ public class Interests {
         }
         this.users = new LinkedList<>();
     }
-    
+
     @Override public int hashCode() {
-		return interest;
-	}
+        return interest;
+    }
 
     public User getUser(){
         return user;
@@ -39,7 +39,7 @@ public class Interests {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] hashBytes = digest.digest(password.getBytes());
         BigInteger hashInt = new BigInteger(1, hashBytes);
-        return hashInt.intValue(); 
+        return hashInt.intValue();
     }
 
     @Override
@@ -95,4 +95,4 @@ public class Interests {
         return result;
     }
 
-    }
+}
