@@ -15,15 +15,18 @@ public class SocialMediaApp {
     private InterestManager interestManager;
 
     public SocialMediaApp() {
-        this.userBST = new UserBST();
-        this.dataTables = new DataTables(100, this.interestManager);
-        this.friendGraph = new FriendGraph();
         this.interestManager = new InterestManager(30);
+        this.dataTables = new DataTables(100, this.interestManager);// Initialize InterestManager first
+        this.userBST = new UserBST();
+         // Now pass the initialized interestManager
+        this.friendGraph = new FriendGraph();
         this.fileManager = new FileManager();
     }
 
+
+
     public void loadUsers() {
-        FileManager.loadData(userBST, dataTables, friendGraph);
+        FileManager.loadData(userBST, dataTables, friendGraph, interestManager);
         System.out.println("DEBUG: After loading data, checking user friends:");
         ArrayList<User> allUsers = userBST.getUsers();
         for (User u : allUsers) {

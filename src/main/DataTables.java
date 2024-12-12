@@ -79,16 +79,15 @@ public class DataTables {
     }
 
 
-    public void userHasInterest(String interest, User user) {
-        System.out.println("DEBUG: Associating interest: " + interest + " with user: " + user.getFullName());
-        if (interest != null && user != null) {
-            Interests newInterest = new Interests(interest, user);
-            ih.add(newInterest);
-            // Also add to InterestManager
-            interestManager.addInterest(interest, user);
-            System.out.println("DEBUG: Successfully added interest to hash table and InterestManager");
-        }
+    public void userHasInterest(String interestName, User user) {
+        // Create new Interest object
+        // Add to InterestManager
+        interestManager.addInterest(interestName, user);
+
+        // Debugging
+        System.out.println("DEBUG: Registered interest " + interestName + " for user " + user.getFullName());
     }
+
 
 
 }

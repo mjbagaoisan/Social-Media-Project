@@ -18,16 +18,16 @@ public class FileManager {
         InterestManager interestManager;
 
 
-        FriendshipData(int userId) {
+        FriendshipData(int userId, InterestManager interestManager) {
             this.userId = userId;
             this.friendIds = new ArrayList<>();
-            this.dataTables = new DataTables(100,  interestManager);
+            this.dataTables = new DataTables(100, interestManager); // Passing InterestManager here
             this.friendGraph = new FriendGraph();
-
+            this.interestManager = interestManager;  // Initialize interestManager here
         }
     }
 
-    public static void loadData(UserBST userBST, DataTables dataTables, FriendGraph friendGraph) {
+    public static void loadData(UserBST userBST, DataTables dataTables, FriendGraph friendGraph, InterestManager interestManager) {
         File file = new File("data.txt");
         List<FriendshipData> friendships = new ArrayList<>();
 
@@ -44,8 +44,9 @@ public class FileManager {
                     String password = scanner.nextLine().trim();
                     int numFriends = Integer.parseInt(scanner.nextLine().trim());
 
-                    // Store friendship data
-                    FriendshipData friendshipData = new FriendshipData(id);
+                    // Pass interestManager to FriendshipData constructor
+                    FriendshipData friendshipData = new FriendshipData(id, interestManager); // Pass InterestManager here
+
                     for (int i = 0; i < numFriends; i++) {
                         if (!scanner.hasNextLine()) break;
                         String friendIdStr = scanner.nextLine().trim();
@@ -76,14 +77,15 @@ public class FileManager {
                     userBST.insertUser(user);
                     dataTables.register(username, password);
 
-                    // Important: Add interests to InterestManager via DataTables
+                    // Add interests to InterestManager via DataTables
                     interests.positionIterator();
                     while (!interests.offEnd()) {
                         String interest = interests.getIterator();
                         System.out.println("DEBUG: Registering interest: " + interest + " for user: " + user.getFullName());
-                        dataTables.userHasInterest(interest, user);  // This adds to InterestManager
+                        dataTables.userHasInterest(interest, user);  // This should add the interest to InterestManager
                         interests.advanceIterator();
                     }
+
 
                 } catch (NumberFormatException e) {
                     System.err.println("Error parsing number: " + e.getMessage());
@@ -92,7 +94,6 @@ public class FileManager {
                     e.printStackTrace();
                 }
             }
-
 
             // Establish friendships after all users are loaded
             for (FriendshipData friendshipData : friendships) {
@@ -109,7 +110,6 @@ public class FileManager {
                 }
             }
 
-
             ArrayList<User> allUsers = userBST.getUsers();
             for (User user : allUsers) {
                 friendGraph.addUser(user);
@@ -118,10 +118,7 @@ public class FileManager {
             // Add edges (friendships) to the friendGraph
             for (User user : allUsers) {
                 BST<User> friendsBST = user.getFriends();
-
-
                 String friendsInOrder = friendsBST.inOrderString();
-
                 String[] lines = friendsInOrder.split("\n");
                 for (String l : lines) {
                     if (l.trim().isEmpty()) continue;
@@ -133,6 +130,17 @@ public class FileManager {
 
                     friendGraph.addFriend(user.getId(), friendId);
                 }
+            }
+
+            for (User user : userBST.getUsers()) {
+                System.out.println("DEBUG: Loaded user: " + user.getFullName());
+                LinkedList<String> userInterests = user.getInterests();
+                userInterests.positionIterator();
+                while (!userInterests.offEnd()) {
+                    System.out.println("DEBUG: Loaded interest: " + userInterests.getIterator());
+                    userInterests.advanceIterator();
+                }
+
             }
 
         } catch (FileNotFoundException e) {

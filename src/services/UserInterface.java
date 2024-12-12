@@ -359,9 +359,8 @@ public class UserInterface {
             System.out.println("Invalid user.");
             return;
         }
-
         System.out.println("Interests:");
-        LinkedList<String> interests = interestManager.getInterestNamesForDisplay(friend.getId());
+        LinkedList<String> interests = interestManager.getInterestNamesForDisplay(friend.getId());  // Get interests
 
         if (interests.isEmpty()) {
             System.out.println(friend.getFullName() + " has no interests listed.");
@@ -373,6 +372,8 @@ public class UserInterface {
             }
         }
     }
+
+
 
 
     public void searchByInterest() {
@@ -477,6 +478,14 @@ public class UserInterface {
 
     private void removeFriend(User friend) {
         friendGraph.removeFriend(loggedInUser.getId(),friend.getId());
+        // Create a comparator that compares users by their ID (or any other field you prefer)
+        Comparator<User> userComparator = (u1, u2) -> Integer.compare(u1.getId(), u2.getId());
+
+        // Remove the friend from the logged-in user's friends BST
+        loggedInUser.getFriends().remove(friend, userComparator);
+
+        // Also remove the logged-in user from the friend's friends list
+        friend.getFriends().remove(loggedInUser, userComparator);
         System.out.println(friend.getFullName() + " removed as a friend.");
     }
 
