@@ -9,7 +9,7 @@ import dataStructures.LinkedList;
 import java.util.ArrayList;
 import main.User;
 import main.UserBST;
-import main.UserFriend;
+
 
 
 public class UserTest {

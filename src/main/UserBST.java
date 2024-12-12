@@ -7,12 +7,19 @@ import dataStructures.LinkedList;
 
 public class UserBST {
     private BST<User> userNameBST;
+    private BST<User> usernameUserBST;
+    
+    // Comparators for different sorting methods
     private Comparator<User> nameComparator = (u1, u2) ->
             u1.getFullName().compareToIgnoreCase(u2.getFullName());
+    private Comparator<User> usernameComparator = (u1, u2) -> 
+        u1.getUsername().compareToIgnoreCase(u2.getUsername());
+    
     private ArrayList<User> userReferences = new ArrayList<>();
 
     public UserBST() {
         userNameBST = new BST<>();
+        usernameUserBST = new BST<>();
     }
 
     public void insertUser(User user) {
@@ -20,7 +27,8 @@ public class UserBST {
             return;
         }
         userNameBST.insert(user, nameComparator);
-        userReferences.add(user); // Keep the actual reference here
+        usernameUserBST.insert(user, usernameComparator);
+        userReferences.add(user);
     }
 
     public ArrayList<User> getUsers() {
@@ -51,6 +59,34 @@ public class UserBST {
             }
         }
         return matchingUsers;
+    }
+
+    /**
+     * Search for a user by exact username
+     * @param username Username to search for
+     * @return User with the matching username, or null if not found
+     */
+    public User searchUserByUsername(String username) {
+        User dummyUser = new User(
+            "", 
+            "", 
+            username, 
+            "tempPassword", 
+            0, 
+            null, 
+            null, 
+            null
+        );
+        
+        return usernameUserBST.search(dummyUser, usernameComparator);
+    }
+
+    /**
+     * Get all users in the system
+     * @return ArrayList of all users
+     */
+    public ArrayList<User> getAllUsers() {
+        return new ArrayList<>(userReferences);
     }
 
     public void addFriendship(User user1, User user2) {
@@ -97,5 +133,4 @@ public class UserBST {
         }
         return false;
     }
-
 }

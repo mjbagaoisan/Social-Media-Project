@@ -4,7 +4,6 @@ import main.*;
 import java.util.*;
 import dataStructures.BST;
 import dataStructures.LinkedList;
-import main.InterestManager;
 import services.FileManager;
 
 public class UserInterface {
@@ -32,29 +31,36 @@ public class UserInterface {
     }
 
     private void mainMenu() {
-        while (true) {
-            System.out.println("1. Login");
-            System.out.println("2. Create Account");
-            System.out.println("3. Exit and Save Data");
-            System.out.print("Choose an option: ");
-            int choice = scanner.nextInt();
+    int choice;
+    while (true) {
+        System.out.println("1. Login");
+        System.out.println("2. Create Account");
+        System.out.println("3. Exit and Save Data");
+        System.out.print("Choose an option: ");
+        if (scanner.hasNextInt()) {
+            choice = scanner.nextInt();
             scanner.nextLine(); // consume newline
+            break;
+        } else {
+            System.out.println("Invalid input. Please enter a number.");
+            scanner.nextLine(); // consume invalid input
+        }
+    }
 
-            switch (choice) {
-                case 1:
-                    login();
-                    break;
-                case 2:
-                    createAccount();
-                    break;
-                case 3:
-                    System.out.println("Saving data and exiting.... Goodbye!");
-                    FileManager.saveData(userBST, dataTables, friendGraph, interestManager);
-                    return;
-                default:
-                    System.out.println("Invalid choice.");
-                    break; // Add break here
-            }
+        switch (choice) {
+            case 1:
+                login();
+                break;
+            case 2:
+                createAccount();
+                break;
+            case 3:
+                System.out.println("Saving data and exiting.... Goodbye!");
+                FileManager.saveData(userBST, dataTables, friendGraph, interestManager);
+                return;
+            default:
+                System.out.println("Invalid choice.");
+                break;
         }
     }
 
