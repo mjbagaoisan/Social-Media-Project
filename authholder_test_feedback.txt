@@ -1,5 +1,10 @@
-PASS: Starting AuthHolder Tests
-PASS: AuthHolder created successfully
-PASS: Password verification successful
-PASS: Incorrect password verification failed
-PASS: All tests passed!
+Starting AuthHolder Tests...
+PASS: getUsername() returned expected value 'johndoe'.
+PASS: Password hash matched expected hash.
+PASS: verifyPassword('mypassword') returned true as expected.
+PASS: verifyPassword('wrongpassword') returned false as expected.
+PASS: authHolder1 is equal to authHolder2.
+PASS: authHolder1 is not equal to authHolder3.
+PASS: compareTo returned 0 for equal AuthHolders.
+FAIL: compareTo should return a negative value for authHolder1 compared to authHolder3.
+Total errors: 1

@@ -7,6 +7,8 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.security.MessageDigest;
+
 
 public class AuthHolderTest {
     private PrintWriter testFeedback;
@@ -30,63 +32,141 @@ public class AuthHolderTest {
     }
 
     public void runTests() {
-        msg("Starting AuthHolder Tests", true, "");
+        msg("Starting AuthHolder Tests...");
 
         int errorCount = 0;
 
-        // Test 1: Create AuthHolder
-        try {
-            AuthHolder authHolder = new AuthHolder("test_user", "password123");
-            msg("AuthHolder created successfully", true, "");
-        } catch (Exception e) {
-            msg("AuthHolder creation failed", false, e.getMessage());
-            errorCount++;
-        }
+        // Test creation and password hashing
+        errorCount += testAuthHolderCreation();
 
-        // Test 2: Verify Password
-        try {
-            AuthHolder authHolder = new AuthHolder("test_user", "password123");
-            if (authHolder.verifyPassword("password123")) {
-                msg("Password verification successful", true, "");
-            } else {
-                msg("Password verification failed", false, "");
-                errorCount++;
-            }
-        } catch (Exception e) {
-            msg("Password verification failed", false, e.getMessage());
-            errorCount++;
-        }
+        // Test password verification
+        errorCount += testPasswordVerification();
 
-        // Test 3: Incorrect Password
-        try {
-            AuthHolder authHolder = new AuthHolder("test_user", "password123");
-            if (!authHolder.verifyPassword("wrong_password")) {
-                msg("Incorrect password verification failed", true, "");
-            } else {
-                msg("Incorrect password verification succeeded", false, "");
-                errorCount++;
-            }
-        } catch (Exception e) {
-            msg("Incorrect password verification failed", false, e.getMessage());
-            errorCount++;
-        }
+        // Test equals and compareTo methods
+        errorCount += testEqualsAndCompareTo();
 
         // Summary
         if (errorCount == 0) {
-            msg("All tests passed!", true, "");
+            msg("All tests passed!");
         } else {
-            msg("Total errors: " + errorCount, false, "");
+            msg("Total errors: " + errorCount);
         }
     }
 
-    private void msg(String testName, boolean passed, String additionalInfo) {
-        String message = "PASS: " + testName;
-        if (!passed) {
-            message = "FAIL: " + testName;
+    private int testAuthHolderCreation() {
+        int errors = 0;
+        try {
+            AuthHolder authHolder = new AuthHolder("johndoe", "mypassword");
+
+            // Check if username is correctly set
+            if (!"johndoe".equals(authHolder.getUsername())) {
+                msg("FAIL: getUsername() expected 'johndoe', got '" + authHolder.getUsername() + "'");
+                errors++;
+            } else {
+                msg("PASS: getUsername() returned expected value 'johndoe'.");
+            }
+
+            // Check if the password hash is generated
+            String expectedHash = hashPassword("mypassword");
+            if (!authHolder.getPasswordHash().equals(expectedHash)) {
+                msg("FAIL: Password hash did not match expected hash.");
+                errors++;
+            } else {
+                msg("PASS: Password hash matched expected hash.");
+            }
+
+        } catch (Exception e) {
+            msg("FAIL: Exception during testAuthHolderCreation: " + e.getMessage());
+            errors++;
         }
-        if (!additionalInfo.isEmpty()) {
-            message += " (" + additionalInfo + ")";
+        return errors;
+    }
+
+    private int testPasswordVerification() {
+        int errors = 0;
+        try {
+            AuthHolder authHolder = new AuthHolder("johndoe", "mypassword");
+
+            // Verify correct password
+            if (!authHolder.verifyPassword("mypassword")) {
+                msg("FAIL: verifyPassword('mypassword') should return true.");
+                errors++;
+            } else {
+                msg("PASS: verifyPassword('mypassword') returned true as expected.");
+            }
+
+            // Verify incorrect password
+            if (authHolder.verifyPassword("wrongpassword")) {
+                msg("FAIL: verifyPassword('wrongpassword') should return false.");
+                errors++;
+            } else {
+                msg("PASS: verifyPassword('wrongpassword') returned false as expected.");
+            }
+
+        } catch (Exception e) {
+            msg("FAIL: Exception during testPasswordVerification: " + e.getMessage());
+            errors++;
         }
+        return errors;
+    }
+
+    private int testEqualsAndCompareTo() {
+        int errors = 0;
+        try {
+            AuthHolder authHolder1 = new AuthHolder("johndoe", "mypassword");
+            AuthHolder authHolder2 = new AuthHolder("johndoe", "mypassword");
+            AuthHolder authHolder3 = new AuthHolder("janedoe", "password123");
+
+            // Test equality
+            if (!authHolder1.equals(authHolder2)) {
+                msg("FAIL: authHolder1 should be equal to authHolder2.");
+                errors++;
+            } else {
+                msg("PASS: authHolder1 is equal to authHolder2.");
+            }
+
+            if (authHolder1.equals(authHolder3)) {
+                msg("FAIL: authHolder1 should not be equal to authHolder3.");
+                errors++;
+            } else {
+                msg("PASS: authHolder1 is not equal to authHolder3.");
+            }
+
+            // Test compareTo
+            if (authHolder1.compareTo(authHolder2) != 0) {
+                msg("FAIL: compareTo should return 0 for equal AuthHolders.");
+                errors++;
+            } else {
+                msg("PASS: compareTo returned 0 for equal AuthHolders.");
+            }
+
+            if (authHolder1.compareTo(authHolder3) >= 0) {
+                msg("FAIL: compareTo should return a negative value for authHolder1 compared to authHolder3.");
+                errors++;
+            } else {
+                msg("PASS: compareTo returned a negative value as expected for authHolder1 compared to authHolder3.");
+            }
+
+        } catch (Exception e) {
+            msg("FAIL: Exception during testEqualsAndCompareTo: " + e.getMessage());
+            errors++;
+        }
+        return errors;
+    }
+
+    private String hashPassword(String password) throws Exception {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] hashBytes = digest.digest(password.getBytes());
+        StringBuilder hexString = new StringBuilder(2 * hashBytes.length);
+        for (byte b : hashBytes) {
+            String hex = Integer.toHexString(0xff & b);
+            if (hex.length() == 1) hexString.append('0');
+            hexString.append(hex);
+        }
+        return hexString.toString();
+    }
+
+    private void msg(String message) {
         testFeedback.write(message + "\n");
         System.out.println(message);
     }
